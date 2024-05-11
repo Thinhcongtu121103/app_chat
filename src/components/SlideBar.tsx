@@ -11,16 +11,16 @@ import Button from "@mui/material/Button";
 
 // Define styled components
 const StyledContainer = styled.div`
-  /* Add CSS styles for container */
+    /* Add CSS styles for container */
     height: 100vh;
     min-width: 300px;
     max-width: 350px;
     overflow-y: scroll;
-    border-rìght: 1px solid whitesmoke;
+    border-right: 1px solid whitesmoke;
 `;
 
 const StyledHeader = styled.div`
-  /* Add CSS styles for header */
+    /* Add CSS styles for header */
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -31,11 +31,11 @@ const StyledHeader = styled.div`
     top: 0;
     background-color: white;
     z-index: 1;
-    
+
 `;
 
 const StyledSearch = styled.div`
-  /* Add CSS styles for search */
+    /* Add CSS styles for search */
     display: flex;
     align-items: center;
     padding: 15px;
@@ -43,16 +43,16 @@ const StyledSearch = styled.div`
 `;
 
 const StyledSearchInput = styled.input`
-  /* Add CSS styles for search input */
+    /* Add CSS styles for search input */
     outline: none;
     border: none;
     flex: 1;
-    
+
 `;
 
 
 const StyledSideBarButton = styled(Button)`
-  /* Add CSS styles for sidebar button */
+    /* Add CSS styles for sidebar button */
     width: 100%;
     border-top: 1px solid whitesmoke;
     border-bottom: 1px solid whitesmoke;
@@ -63,26 +63,26 @@ const StyledUserAvatar = styled(Avatar)`
     :hover {
         opacity: 0.8;
     }
-    `;
+`;
 // Sidebar Component
-const SlideBar = () => {
+const SlideBar: React.FC = () => {
     return (
         <StyledContainer>
             <StyledHeader>
                 <Tooltip title='User email' placement='right'>
                     <StyledUserAvatar />
                 </Tooltip>
-<div>
-    <IconButton>
-        <ChatIcon></ChatIcon>
-    </IconButton>
-    <IconButton>
-        <MoreVerticalIcon></MoreVerticalIcon>
-    </IconButton>
-    <IconButton>
-        <LogoutIcon></LogoutIcon>
-    </IconButton>
-</div>
+                <div>
+                    <IconButton>
+                        <ChatIcon></ChatIcon>
+                    </IconButton>
+                    <IconButton>
+                        <MoreVerticalIcon></MoreVerticalIcon>
+                    </IconButton>
+                    <IconButton>
+                        <LogoutIcon></LogoutIcon>
+                    </IconButton>
+                </div>
             </StyledHeader>
             <StyledSearch>
                 <SearchIcon />
