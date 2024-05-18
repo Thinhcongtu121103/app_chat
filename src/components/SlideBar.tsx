@@ -8,6 +8,9 @@ import MoreVerticalIcon from '@mui/icons-material/MoreVert';
 import LogoutIcon from '@mui/icons-material/Logout';
 import SearchIcon from '@mui/icons-material/Search';
 import Button from "@mui/material/Button";
+import { auth } from "../config/firebase";
+import { useNavigate } from 'react-router-dom';
+
 
 // Define styled components
 const StyledContainer = styled.div`
@@ -66,6 +69,15 @@ const StyledUserAvatar = styled(Avatar)`
 `;
 // Sidebar Component
 const SlideBar: React.FC = () => {
+    const navigate = useNavigate();
+    const logout = async () => {
+        try {
+            await auth.signOut();
+            navigate('/login');
+        } catch (e) {
+            console.log(e);
+        }
+    }
     return (
         <StyledContainer>
             <StyledHeader>
@@ -79,8 +91,8 @@ const SlideBar: React.FC = () => {
                     <IconButton>
                         <MoreVerticalIcon></MoreVerticalIcon>
                     </IconButton>
-                    <IconButton>
-                        <LogoutIcon></LogoutIcon>
+                    <IconButton onClick={logout}>
+                        <LogoutIcon />
                     </IconButton>
                 </div>
             </StyledHeader>
