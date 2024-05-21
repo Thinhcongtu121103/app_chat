@@ -1,15 +1,16 @@
 import React from 'react';
 import styled from "styled-components";
-import Avatar from "@mui/material/Avatar";
-import Tooltip from "@mui/material/Tooltip";
-import IconButton from "@mui/material/IconButton";
 import ChatIcon from "@mui/icons-material/Chat";
 import MoreVerticalIcon from '@mui/icons-material/MoreVert';
 import LogoutIcon from '@mui/icons-material/Logout';
 import SearchIcon from '@mui/icons-material/Search';
+import Tooltip from "@mui/material/Tooltip";
+import IconButton from "@mui/material/IconButton";
+import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
 import { auth } from "../config/firebase";
 import { useNavigate } from 'react-router-dom';
+
 
 
 // Define styled components
