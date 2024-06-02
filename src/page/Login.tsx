@@ -1,4 +1,3 @@
-// src/login/Login.tsx
 import React, { useState, useEffect } from 'react';
 import { useWebSocket } from '../context/WebSocketContext';
 import { useNavigate } from 'react-router-dom';
@@ -8,7 +7,7 @@ interface LoginProps {
 }
 
 const Login: React.FC<LoginProps> = ({ setIsLoggedIn }) => {
-    const { sendMessage, lastMessage } = useWebSocket();
+    const { sendMessage, lastMessage, isLoggedIn } = useWebSocket();
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const navigate = useNavigate();
@@ -32,14 +31,40 @@ const Login: React.FC<LoginProps> = ({ setIsLoggedIn }) => {
         });
     };
 
-    console.log("Hook useEffect được kích hoạt");
     useEffect(() => {
-        if (lastMessage && lastMessage.data && lastMessage.data.event === 'LOGIN' && lastMessage.data.success) {
-            console.log('Đăng nhập thành công');
-            setIsLoggedIn(true);
-            navigate('/');
+        console.log('useEffect called');
+        console.log('lastMessage:', lastMessage);
+        if (lastMessage) {
+            console.log('Data:', lastMessage.data);
+            if (lastMessage.data) {
+                console.log('Data event:', lastMessage.event);
+                console.log('Data status:', lastMessage.data.status);
+                if (lastMessage.event === 'LOGIN') {
+                    if (lastMessage.status === 'success') {
+                        console.log('Login successful');
+                        setIsLoggedIn(true);
+                        navigate('/');
+                    } else {
+                        console.log('Login status:', lastMessage.data.status);
+                    }
+                } else {
+                    console.log('Event is not LOGIN');
+                }
+            } else {
+                console.log('No data property in lastMessage');
+            }
+        } else {
+            console.log('No last message received');
         }
     }, [lastMessage, navigate, setIsLoggedIn]);
+
+
+
+    useEffect(() => {
+        if (isLoggedIn) {
+            navigate('/');
+        }
+    }, [isLoggedIn, navigate]);
 
     return (
         <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">

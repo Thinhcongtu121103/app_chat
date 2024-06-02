@@ -1,4 +1,3 @@
-// src/context/WebSocketContext.tsx
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import WebSocketService from '../websocket/Websocket';
 
@@ -30,14 +29,17 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
 
     useEffect(() => {
         const messageListener = (message: any) => {
+            console.log('Received message:', message);
             setLastMessage(message);
         };
 
         const loginListener = () => {
+            console.log('Logged in');
             setIsLoggedIn(true);
         };
 
         const logoutListener = () => {
+            console.log('Logged out');
             setIsLoggedIn(false);
         };
 
