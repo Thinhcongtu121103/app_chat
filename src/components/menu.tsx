@@ -11,6 +11,10 @@ import CheckBoxIcon from '@mui/icons-material/CheckBox';
 import SettingsIcon from '@mui/icons-material/Settings';
 import Setting from '../components/Setting'
 import MenuSetting from '../components/menuSetting';
+import MessageMain from "./MessageMain";
+import Messages from "./Messages";
+import MessageSetting from "./MessageSetting";
+import Chat from "../page/Chat";
 
 
 
@@ -86,7 +90,7 @@ export default function VerticalTabs() {
                 <Tab icon={<SettingsIcon/>} aria-label='setting' value={3} />
             </Tabs>
             <TabPanel value={value} index={0}>
-                1
+                <Chat/>
             </TabPanel>
             <TabPanel value={value} index={1}>
                 <Setting/>
