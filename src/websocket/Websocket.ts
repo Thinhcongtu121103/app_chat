@@ -4,7 +4,7 @@ class WebSocketService {
     private listeners: { [key: string]: ((data: any) => void)[] } = {};
 
     private constructor() {
-        // Khởi tạo kết nối WebSocket
+        // Initialize WebSocket connection
         this.connect('ws://140.238.54.136:8080/chat/chat');
     }
 
@@ -16,40 +16,38 @@ class WebSocketService {
     }
 
     private connect(url: string) {
-        // Khởi tạo kết nối WebSocket
+        // Initialize WebSocket connection
         this.socket = new WebSocket(url);
 
-        // Xử lý sự kiện khi kết nối được thiết lập
+        // Handle events when connection is established
         this.socket.onopen = () => {
             console.log('WebSocket connection established');
         };
 
-        // Xử lý sự kiện khi nhận được tin nhắn từ server
+        // Handle events when message is received from server
         this.socket.onmessage = (event) => {
             console.log('Received message:', event.data);
-            // Xử lý tin nhắn ở đây
             this.notifyListeners('message', JSON.parse(event.data));
         };
 
-        // Xử lý sự kiện khi có lỗi xảy ra trong quá trình kết nối
+        // Handle events when error occurs during connection
         this.socket.onerror = (error) => {
             console.error('WebSocket error:', error);
         };
 
-        // Xử lý sự kiện khi kết nối bị đóng
+        // Handle events when connection is closed
         this.socket.onclose = () => {
             console.log('WebSocket connection closed');
         };
     }
 
     public login(username: string, password: string) {
-        // Kiểm tra nếu kết nối WebSocket không tồn tại
         if (!this.socket || this.socket.readyState !== WebSocket.OPEN) {
             console.error('WebSocket connection is not open');
             return;
         }
 
-        // Gửi thông điệp đăng nhập qua kết nối WebSocket
+        // Send login message via WebSocket
         const loginMessage = {
             action: 'onchat',
             data: {
@@ -61,7 +59,6 @@ class WebSocketService {
     }
 
     public sendMessage(message: any) {
-        // Gửi tin nhắn qua kết nối WebSocket
         if (this.socket && this.socket.readyState === WebSocket.OPEN) {
             this.socket.send(JSON.stringify(message));
         } else {
@@ -69,33 +66,62 @@ class WebSocketService {
         }
     }
 
-    public addListener(event: string, listener: (data: any) => void) {
-        // Thêm bộ lắng nghe cho các sự kiện WebSocket
+    public addMessageListener(event: string, listener: (data: any) => void) {
         if (!this.listeners[event]) {
             this.listeners[event] = [];
         }
         this.listeners[event].push(listener);
     }
 
-    public removeListener(event: string, listener: (data: any) => void) {
-        // Xóa bộ lắng nghe cho các sự kiện WebSocket
+    public removeMessageListener(event: string, listener: (data: any) => void) {
         if (this.listeners[event]) {
             this.listeners[event] = this.listeners[event].filter(l => l !== listener);
         }
     }
 
     private notifyListeners(event: string, data: any) {
-        // Thông báo cho tất cả các bộ lắng nghe đã đăng ký cho sự kiện
         if (this.listeners[event]) {
             this.listeners[event].forEach(listener => listener(data));
         }
     }
 
     public close() {
-        // Đóng kết nối WebSocket
         if (this.socket) {
             this.socket.close();
         }
+    }
+
+    public getUserList() {
+        if (!this.socket || this.socket.readyState !== WebSocket.OPEN) {
+            console.error('WebSocket connection is not open');
+            return;
+        }
+
+        // Send getUserList message via WebSocket
+        const getUserListMessage = {
+            action: 'onchat',
+            data: {
+                event: 'GET_USER_LIST'
+            }
+        };
+        this.sendMessage(getUserListMessage);
+    }
+
+    public createRoom(roomName: string) {
+        if (!this.socket || this.socket.readyState !== WebSocket.OPEN) {
+            console.error('WebSocket connection is not open');
+            return;
+        }
+
+        // Send createRoom message via WebSocket
+        const createRoomMessage = {
+            action: 'onchat',
+            data: {
+                event: 'CREATE_ROOM',
+                data: { name: roomName }
+            }
+        };
+        this.sendMessage(createRoomMessage);
     }
 }
 
