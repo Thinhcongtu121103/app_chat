@@ -4,7 +4,7 @@ import './index.css';
 import App from './App';
 import ChatSettingsPanel from './components/Setting';
 import reportWebVitals from './reportWebVitals';
-import VerticalTabs from "./components/menu";
+import VerticalTabs from "./components/Menu";
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement

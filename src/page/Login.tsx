@@ -32,33 +32,19 @@ const Login: React.FC<LoginProps> = ({ setIsLoggedIn }) => {
     };
 
     useEffect(() => {
-        console.log('useEffect called');
-        console.log('lastMessage:', lastMessage);
-        if (lastMessage) {
-            console.log('Data:', lastMessage.data);
-            if (lastMessage.data) {
-                console.log('Data event:', lastMessage.event);
-                console.log('Data status:', lastMessage.data.status);
-                if (lastMessage.event === 'LOGIN') {
-                    if (lastMessage.status === 'success') {
-                        console.log('Login successful');
-                        setIsLoggedIn(true);
-                        navigate('/');
-                    } else {
-                        console.log('Login status:', lastMessage.data.status);
-                    }
-                } else {
-                    console.log('Event is not LOGIN');
-                }
+        if (lastMessage && lastMessage.event === 'LOGIN') {
+            if (lastMessage.status === 'success') {
+                console.log('Login successful');
+                setIsLoggedIn(true);
+                localStorage.setItem('loginCode', lastMessage.data.RE_LOGIN_CODE);
+                localStorage.setItem('username', username);
+                localStorage.setItem('reloginPerformed', 'true'); // Đánh dấu đã thực hiện re-login
+                navigate('/');
             } else {
-                console.log('No data property in lastMessage');
+                console.log('Login status:', lastMessage.status);
             }
-        } else {
-            console.log('No last message received');
         }
-    }, [lastMessage, navigate, setIsLoggedIn]);
-
-
+    }, [lastMessage, navigate, setIsLoggedIn, username]);
 
     useEffect(() => {
         if (isLoggedIn) {
