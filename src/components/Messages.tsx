@@ -7,17 +7,34 @@ const MessagesComponent = () => {
     const [isPopupOpen, setIsPopupOpen] = useState(false);
     const [roomName, setRoomName] = useState('');
     const [messages, setMessages] = useState<any[]>([]);
-    const { sendMessage, userList } = useWebSocket(); // Sử dụng hook useWebSocket để gửi tin nhắn và lấy danh sách người dùng
+    const [isLoggedIn, setIsLoggedIn] = useState(false); // Thêm trạng thái để theo dõi trạng thái đăng nhập
+    const [roomCreated, setRoomCreated] = useState(false); // Thêm trạng thái để theo dõi việc tạo phòng thành công
+    const { sendMessage, userList, createRoom } = useWebSocket(); // Sử dụng hook useWebSocket để gửi tin nhắn và lấy danh sách người dùng
 
     useEffect(() => {
-        console.log('Fetching user list...');
-        sendMessage({
-            action: 'onchat',
-            data: {
-                event: 'GET_USER_LIST'
-            }
-        });
-    }, [sendMessage]);
+        if (isLoggedIn) { // Chỉ gọi API lấy danh sách người dùng khi đã đăng nhập
+            console.log('Fetching user list...');
+            sendMessage({
+                action: 'onchat',
+                data: {
+                    event: 'GET_USER_LIST'
+                }
+            });
+        }
+    }, [isLoggedIn]); // Chỉ gọi lại khi isLoggedIn thay đổi
+
+    useEffect(() => {
+        if (roomCreated) { // Gọi lại API lấy danh sách người dùng khi tạo phòng thành công
+            console.log('Room created, fetching user list again...');
+            sendMessage({
+                action: 'onchat',
+                data: {
+                    event: 'GET_USER_LIST'
+                }
+            });
+            setRoomCreated(false); // Reset trạng thái để tránh gọi API không cần thiết
+        }
+    }, [roomCreated, sendMessage]);
 
     const handleNewMessage = (message: any) => {
         setMessages(prevMessages => [...prevMessages, message]);
@@ -28,17 +45,16 @@ const MessagesComponent = () => {
     };
 
     const handleCreateRoom = () => {
-        const createRoomMessage = {
-            action: 'onchat',
-            data: {
-                event: 'CREATE_ROOM',
-                data: { name: roomName }
-            }
-        };
-        sendMessage(createRoomMessage);
+        createRoom(roomName); // Gọi hàm createRoom từ hook useWebSocket
+        setRoomCreated(true); // Đánh dấu rằng phòng đã được tạo
         setIsPopupOpen(false);
         setRoomName('');
     };
+
+    // Giả lập đăng nhập thành công (thay thế bằng logic đăng nhập thực tế)
+    useEffect(() => {
+        setIsLoggedIn(true);
+    }, []);
 
     return (
         <div className="w-[349px] h-[700px] overflow-y-auto bg-white shadow flex-col justify-start items-center inline-flex">

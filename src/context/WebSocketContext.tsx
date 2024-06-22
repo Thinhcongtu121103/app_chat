@@ -7,7 +7,9 @@ interface WebSocketContextValue {
     isLoggedIn: boolean;
     setLoggedIn: (loggedIn: boolean) => void;
     userList: any[]; // Danh sách người dùng
+    createRoom: (roomName: string) => void; // Thêm hàm createRoom
 }
+
 
 const WebSocketContext = createContext<WebSocketContextValue | null>(null);
 
@@ -39,9 +41,6 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
                 case 'GET_USER_LIST':
                     handleUserListMessage(message.data);
                     break;
-                case 'CREATE_ROOM_SUCCESS':
-                    fetchUserList();
-                    break;
                 // Xử lý các tin nhắn khác nếu cần
                 default:
                     break;
@@ -68,7 +67,15 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
             webSocketServiceInstance.removeMessageListener('login', loginListener);
             webSocketServiceInstance.removeMessageListener('logout', logoutListener);
         };
-    }, [webSocketServiceInstance]);
+    }, []); // Chỉ kích hoạt một lần khi component mount
+
+    useEffect(() => {
+        // Gọi API GET_USER_LIST khi isLoggedIn thay đổi và isLoggedIn là true
+        if (isLoggedIn) {
+            console.log('Fetching user list...');
+            fetchUserList();
+        }
+    }, [isLoggedIn]);
 
     const sendMessage = (message: any) => {
         webSocketServiceInstance.sendMessage(message);
