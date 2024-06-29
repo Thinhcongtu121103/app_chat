@@ -123,6 +123,26 @@ class WebSocketService {
         };
         this.sendMessage(createRoomMessage);
     }
+
+    // Add this method to get chat messages between two users
+    public getPeopleChatMessages(name: string, page: number = 1) {
+        if (!this.socket || this.socket.readyState !== WebSocket.OPEN) {
+            console.error('WebSocket connection is not open');
+            return;
+        }
+
+        const getPeopleChatMessagesMessage = {
+            action: 'onchat',
+            data: {
+                event: 'GET_PEOPLE_CHAT_MES',
+                data: {
+                    name: name,
+                    page: page
+                }
+            }
+        };
+        this.sendMessage(getPeopleChatMessagesMessage);
+    }
 }
 
 export default WebSocketService;
