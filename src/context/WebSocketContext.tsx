@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import WebSocketService from '../websocket/Websocket';
+import { PeopleChatMessage } from '../components/types';
 
 interface WebSocketContextValue {
     sendMessage: (message: any) => void;
@@ -8,8 +9,9 @@ interface WebSocketContextValue {
     setLoggedIn: (loggedIn: boolean) => void;
     userList: any[]; // Danh sách người dùng
     createRoom: (roomName: string) => void; // Thêm hàm createRoom
+    fetchPeopleChatMessages: (userName: string, page: number) => Promise<PeopleChatMessage[]>; // Change return type to Promise
+    onMessage: (listener: (message: any) => void) => void;
 }
-
 
 const WebSocketContext = createContext<WebSocketContextValue | null>(null);
 
@@ -103,7 +105,36 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
         webSocketServiceInstance.createRoom(roomName);
     };
 
-    const value = { sendMessage, lastMessage, isLoggedIn, setLoggedIn: setIsLoggedIn, userList, createRoom };
+    const fetchPeopleChatMessages = (userName: string, page: number): Promise<PeopleChatMessage[]> => {
+        return new Promise((resolve, reject) => {
+            const message = {
+                action: 'onchat',
+                data: {
+                    event: 'GET_PEOPLE_CHAT_MES',
+                    data: {
+                        name: userName,
+                        page: page
+                    }
+                }
+            };
+
+            const messageListener = (response: any) => {
+                if (response.event === 'GET_PEOPLE_CHAT_MES' && response.data.name === userName) {
+                    resolve(response.data.messages);
+                    webSocketServiceInstance.removeMessageListener('message', messageListener);
+                }
+            };
+
+            webSocketServiceInstance.addMessageListener('message', messageListener);
+            sendMessage(message);
+        });
+    };
+
+    const onMessage = (listener: (message: any) => void) => {
+        webSocketServiceInstance.addMessageListener('message', listener);
+    };
+
+    const value = { sendMessage, lastMessage, isLoggedIn, setLoggedIn: setIsLoggedIn, userList, createRoom, fetchPeopleChatMessages, onMessage };
 
     return (
         <WebSocketContext.Provider value={value}>
