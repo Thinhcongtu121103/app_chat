@@ -10,10 +10,9 @@ import ContactPageIcon from '@mui/icons-material/ContactPage';
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
 import SettingsIcon from '@mui/icons-material/Settings';
 import Setting from '../components/Setting'
-import MenuSetting from '../components/menuSetting';
-import MessageMain from "./MessageMain";
-import Messages from "./Messages";
-import MessageSetting from "./MessageSetting";
+import MessageMain from "../components/MessageMain";
+import Messages from "../components/Messages";
+import MessageSetting from "../components/MessageSetting";
 import Chat from "../page/Chat";
 
 
@@ -99,7 +98,7 @@ export default function VerticalTabs() {
                 3
             </TabPanel>
             <TabPanel value={value} index={3}>
-                <MenuSetting/>
+                <Setting/>
             </TabPanel>
         </Box>
     );

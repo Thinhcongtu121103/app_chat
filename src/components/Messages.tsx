@@ -43,7 +43,11 @@ const MessagesComponent: React.FC<MessagesComponentProps> = ({ onSelectUser }) =
     useEffect(() => {
         const handleNewMessage = (data: any) => {
             if (data.event === 'GET_PEOPLE_CHAT_MES') {
-                setMessages(data.data.messages);
+                if (data.data && data.data.length > 0) {
+                    onSelectUser(data.data[0].to, data.data);
+                } else {
+                    onSelectUser('', []); // Truyền chuỗi trống thay vì null
+                }
             }
         };
 
@@ -52,7 +56,8 @@ const MessagesComponent: React.FC<MessagesComponentProps> = ({ onSelectUser }) =
         return () => {
             // Cleanup listener
         };
-    }, [onMessage]);
+    }, [onMessage, onSelectUser]);
+
 
     const togglePopup = () => {
         setIsPopupOpen(!isPopupOpen);

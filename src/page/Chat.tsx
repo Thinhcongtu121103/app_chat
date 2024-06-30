@@ -20,10 +20,16 @@ const Chat = () => {
     const [showUserSelection, setShowUserSelection] = useState<boolean>(true);
 
     const handleSelectUser = (userName: string, userMessages: any[]) => {
-        setSelectedUser(userName);
-        setMessages(userMessages);
-        setShowUserSelection(false); // Ẩn lựa chọn người dùng sau khi chọn
+        if (userName && userName.trim() !== '' && userMessages.length > 0) {
+            setSelectedUser(userName);
+            setMessages(userMessages);
+        } else {
+            setSelectedUser(null); // Truyền null khi không có user name hợp lệ
+            setMessages([]);
+        }
+        setShowUserSelection(false);
     };
+
 
     const handleSendMessage = (message: string) => {
         if (selectedUser && message.trim()) {
