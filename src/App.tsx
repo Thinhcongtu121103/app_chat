@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-d
 import { WebSocketProvider, useWebSocket } from './context/WebSocketContext';
 import Chat from './page/Chat';
 import Login from './page/Login';
+import Register from './page/Register'; // Import Register component
 import Menu from './components/Menu';
 
 const App: React.FC = () => {
@@ -24,6 +25,7 @@ const App: React.FC = () => {
             <WebSocketProvider>
                 <Routes>
                     <Route path="/login" element={<Login setIsLoggedIn={setIsLoggedIn} />} />
+                    <Route path="/register" element={<Register />} /> {/* Thêm Route cho trang /register */}
                     <Route path="/" element={<PrivateRoute isLoggedIn={isLoggedIn} />}>
                         <Route path="/" element={<Menu />} />
                     </Route>

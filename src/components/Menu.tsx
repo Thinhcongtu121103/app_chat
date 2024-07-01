@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Box from '@mui/material/Box';
 import {Tab, Tabs, Typography} from "@mui/material";
 import Avatar from "@mui/material/Avatar";
@@ -9,13 +9,20 @@ import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 import ContactPageIcon from '@mui/icons-material/ContactPage';
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
 import SettingsIcon from '@mui/icons-material/Settings';
+import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import Setting from '../components/Setting'
 import MessageMain from "../components/MessageMain";
 import Messages from "../components/Messages";
 import MessageSetting from "../components/MessageSetting";
 import Chat from "../page/Chat";
-
-
+import {useWebSocket} from "../context/WebSocketContext";
+import { useNavigate } from 'react-router-dom';
+import Button from '@mui/material/Button';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
 
 interface TabPanelProps {
     children?: React.ReactNode;
@@ -59,9 +66,31 @@ const UserInfo = styled.div`
 
 export default function VerticalTabs() {
     const [value, setValue] = React.useState(0);
-
+    const [openDialog, setOpenDialog] = useState(false); // State for dialog open/close
+    const { sendMessage } = useWebSocket();
+    const navigate = useNavigate();
     const handleChange = (event: React.SyntheticEvent, newValue: number) => {
         setValue(newValue);
+    };
+    const handleLogout = () => {
+        sendMessage({
+            action: 'onchat',
+            data: {
+                event: 'LOGOUT'
+            }
+        });
+
+        // Example: Reset value to 0 and navigate to login page
+        setValue(0);
+        navigate('/login');
+        window.location.reload();
+    };
+    const handleOpenDialog = () => {
+        setOpenDialog(true);
+    };
+
+    const handleCloseDialog = () => {
+        setOpenDialog(false);
     };
 
     return (
@@ -90,6 +119,7 @@ export default function VerticalTabs() {
             </Tabs>
             <TabPanel value={value} index={0}>
                 <Chat/>
+
             </TabPanel>
             <TabPanel value={value} index={1}>
                 <Setting/>
@@ -100,6 +130,39 @@ export default function VerticalTabs() {
             <TabPanel value={value} index={3}>
                 <Setting/>
             </TabPanel>
+            <Box sx={{ position: 'absolute', bottom: 20, left: 10,  }}>
+                <Button
+                    variant="contained"
+                    // color="primary"
+                    startIcon={<ExitToAppIcon />}
+                    onClick={handleOpenDialog}
+                >
+                </Button>
+            </Box>
+
+            {/* Logout confirmation dialog */}
+            <Dialog
+                open={openDialog}
+                onClose={handleCloseDialog}
+                aria-labelledby="alert-dialog-title"
+                aria-describedby="alert-dialog-description"
+            >
+                <DialogTitle id="alert-dialog-title">{"Confirm Logout"}</DialogTitle>
+                <DialogContent>
+                    <DialogContentText id="alert-dialog-description">
+                        Are you sure you want to logout?
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleCloseDialog} color="primary">
+                        Cancel
+                    </Button>
+                    <Button onClick={handleLogout} color="primary" autoFocus>
+                        Logout
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </Box>
+
     );
 }
