@@ -1,22 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCirclePlus } from '@fortawesome/free-solid-svg-icons';
-import { useWebSocket } from '../context/WebSocketContext'; // Import the useWebSocket hook
+import { useWebSocket } from '../context/WebSocketContext';
 
 type MessagesComponentProps = {
     onSelectUser: (userName: string, messages: any[]) => void;
     showUserSelection: boolean;
 };
+
 const MessagesComponent: React.FC<MessagesComponentProps> = ({ onSelectUser }) => {
     const [isPopupOpen, setIsPopupOpen] = useState(false);
     const [roomName, setRoomName] = useState('');
     const [messages, setMessages] = useState<any[]>([]);
-    const [isLoggedIn, setIsLoggedIn] = useState(false); // Thêm trạng thái để theo dõi trạng thái đăng nhập
-    const [roomCreated, setRoomCreated] = useState(false); // Thêm trạng thái để theo dõi việc tạo phòng thành công
-    const { sendMessage, userList, createRoom, fetchPeopleChatMessages, onMessage } = useWebSocket(); // Sử dụng hook useWebSocket để gửi tin nhắn và lấy danh sách người dùng
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [roomCreated, setRoomCreated] = useState(false);
+    const { sendMessage, userList, createRoom, fetchPeopleChatMessages, onMessage } = useWebSocket();
+
+    const [currentSelectedUser, setCurrentSelectedUser] = useState<string>(''); // State để lưu trữ người dùng hiện tại được chọn
 
     useEffect(() => {
-        if (isLoggedIn) { // Chỉ gọi API lấy danh sách người dùng khi đã đăng nhập
+        if (isLoggedIn) {
             console.log('Fetching user list...');
             sendMessage({
                 action: 'onchat',
@@ -25,10 +28,10 @@ const MessagesComponent: React.FC<MessagesComponentProps> = ({ onSelectUser }) =
                 }
             });
         }
-    }, [isLoggedIn]); // Chỉ gọi lại khi isLoggedIn thay đổi
+    }, [isLoggedIn]);
 
     useEffect(() => {
-        if (roomCreated) { // Gọi lại API lấy danh sách người dùng khi tạo phòng thành công
+        if (roomCreated) {
             console.log('Room created, fetching user list again...');
             sendMessage({
                 action: 'onchat',
@@ -36,14 +39,23 @@ const MessagesComponent: React.FC<MessagesComponentProps> = ({ onSelectUser }) =
                     event: 'GET_USER_LIST'
                 }
             });
-            setRoomCreated(false); // Reset trạng thái để tránh gọi API không cần thiết
+            setRoomCreated(false);
         }
     }, [roomCreated, sendMessage]);
 
     useEffect(() => {
         const handleNewMessage = (data: any) => {
             if (data.event === 'GET_PEOPLE_CHAT_MES') {
-                setMessages(data.data.messages);
+                if (data.data && data.data.length > 0) {
+                    onSelectUser(currentSelectedUser, data.data);
+                } else {
+                    onSelectUser('', []);
+                }
+            }
+
+            // Kiểm tra xem tin nhắn mới nhận có phải của người dùng hiện tại hay không
+            if (data.sender === currentSelectedUser || data.to === currentSelectedUser) {
+                // Xử lý tin nhắn mới ở đây (ví dụ: cập nhật state messages)
             }
         };
 
@@ -52,22 +64,21 @@ const MessagesComponent: React.FC<MessagesComponentProps> = ({ onSelectUser }) =
         return () => {
             // Cleanup listener
         };
-    }, [onMessage]);
+    }, [onMessage, onSelectUser, currentSelectedUser]);
 
     const togglePopup = () => {
         setIsPopupOpen(!isPopupOpen);
     };
 
     const handleCreateRoom = () => {
-        createRoom(roomName); // Gọi hàm createRoom từ hook useWebSocket
-        setRoomCreated(true); // Đánh dấu rằng phòng đã được tạo
+        createRoom(roomName);
+        setRoomCreated(true);
         setIsPopupOpen(false);
         setRoomName('');
     };
 
     const handleUserClick = (userName: string) => {
-        // Gọi API để lấy tin nhắn giữa người dùng hiện tại và userName
-        console.log('Fetching chat messages between', userName);
+        setCurrentSelectedUser(userName); // Cập nhật người dùng hiện tại được chọn
         fetchPeopleChatMessages(userName, 1)
             .then(messages => {
                 setMessages(messages);
@@ -77,10 +88,10 @@ const MessagesComponent: React.FC<MessagesComponentProps> = ({ onSelectUser }) =
             });
     };
 
-    // Giả lập đăng nhập thành công (thay thế bằng logic đăng nhập thực tế)
     useEffect(() => {
         setIsLoggedIn(true);
     }, []);
+
     return (
         <div className="w-[349px] h-[700px] overflow-y-auto bg-white shadow flex-col justify-start items-center inline-flex">
             <div className="flex-col justify-start items-start flex w-full">
