@@ -83,6 +83,7 @@ export default function VerticalTabs() {
         // Example: Reset value to 0 and navigate to login page
         setValue(0);
         navigate('/login');
+        window.location.reload();
     };
     const handleOpenDialog = () => {
         setOpenDialog(true);
