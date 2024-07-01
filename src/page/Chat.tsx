@@ -9,34 +9,43 @@ const ChatContainer = styled.div`
     top: 10px;
     margin: 0;
     padding: 0;
-    width: 1340px; /* Đặt kích thước cố định cho trang */
-    height: 700px; /* Đặt kích thước cố định cho trang */
+    width: 1340px;
+    height: 700px;
     overflow: hidden;
+    display: flex; /* Thêm display: flex để các phần tử bên trong tự căn chỉnh */
 `;
+
+
+type Message = {
+    sender: string;
+    mes: string;
+    createAt: string;
+    to: string;
+};
 
 const Chat = () => {
     const [selectedUser, setSelectedUser] = useState<string | null>(null);
-    const [messages, setMessages] = useState<any[]>([]);
+    const [messages, setMessages] = useState<Message[]>([]);
     const [showUserSelection, setShowUserSelection] = useState<boolean>(true);
 
-    const handleSelectUser = (userName: string, userMessages: any[]) => {
+    const handleSelectUser = (userName: string, userMessages: Message[]) => {
         if (userName && userName.trim() !== '' && userMessages.length > 0) {
             setSelectedUser(userName);
             setMessages(userMessages);
         } else {
-            setSelectedUser(null); // Truyền null khi không có user name hợp lệ
+            setSelectedUser(null);
             setMessages([]);
         }
         setShowUserSelection(false);
     };
 
-
     const handleSendMessage = (message: string) => {
         if (selectedUser && message.trim()) {
-            const newMessage = {
+            const newMessage: Message = {
                 sender: 'me',
-                content: message,
-                timestamp: new Date().toISOString(),
+                mes: message,
+                createAt: new Date().toISOString(),
+                to: selectedUser,
             };
             setMessages([...messages, newMessage]);
             // Send message via WebSocket

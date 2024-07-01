@@ -34,6 +34,7 @@ const MessageMain: React.FC<MessageMainProps> = ({ selectedUser, messages, onSen
     const handleSendMessage = () => {
         if (inputMessage.trim() && selectedUser) {
             sendChatMessage('people', selectedUser, inputMessage);
+            onSendMessage(inputMessage);
             setInputMessage('');
         }
     };
