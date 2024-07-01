@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPaperPlane, faPhone, faLink } from '@fortawesome/free-solid-svg-icons';
 import styled from 'styled-components';
+import { useWebSocket } from "../context/WebSocketContext";
 
 const MessageMainStyled = styled.div`
     width: 640px;
@@ -28,11 +29,12 @@ type MessageMainProps = {
 
 const MessageMain: React.FC<MessageMainProps> = ({ selectedUser, messages, onSendMessage }) => {
     const [inputMessage, setInputMessage] = useState('');
+    const { sendChatMessage } = useWebSocket();
 
     const handleSendMessage = () => {
-        if (inputMessage.trim()) {
-            onSendMessage(inputMessage);
-            setInputMessage(''); // Clear input after sending message
+        if (inputMessage.trim() && selectedUser) {
+            sendChatMessage('people', selectedUser, inputMessage);
+            setInputMessage('');
         }
     };
 
@@ -42,10 +44,7 @@ const MessageMain: React.FC<MessageMainProps> = ({ selectedUser, messages, onSen
         }
     };
 
-    // Sắp xếp tin nhắn theo thời gian giảm dần (tin mới nhất xuống dưới)
-    // Sắp xếp tin nhắn theo thời gian tăng dần (tin cũ nhất xuống dưới)
     const sortedMessages = [...messages].sort((a, b) => new Date(a.createAt).getTime() - new Date(b.createAt).getTime());
-
 
     return (
         <MessageMainStyled>
@@ -53,7 +52,7 @@ const MessageMain: React.FC<MessageMainProps> = ({ selectedUser, messages, onSen
                 <div className="flex-col justify-start items-start flex overflow-y-auto">
                     <div className="w-[640px] h-20 p-6 justify-between items-center inline-flex sticky top-0 bg-white">
                         <div className="justify-start items-start gap-4 flex">
-                            <img className="w-10 h-10 relative rounded-[10px]" src="https://via.placeholder.com/40x40" alt="user" />
+                            <img className="w-10 h-10 relative rounded-[10px]" src="https://via.placeholder.com/40x40" alt="user"/>
                             <div className="flex-col justify-start items-start inline-flex">
                                 <div className="text-black text-xl font-semibold font-['Inter'] leading-[25px]">
                                     {selectedUser || 'No User available'}
@@ -66,7 +65,7 @@ const MessageMain: React.FC<MessageMainProps> = ({ selectedUser, messages, onSen
                         </div>
                         <div className="px-4 py-2.5 bg-indigo-500/opacity-10 rounded-lg justify-start items-center gap-2 flex">
                             <div className="w-6 h-6 relative">
-                                <FontAwesomeIcon icon={faPhone} />
+                                <FontAwesomeIcon icon={faPhone}/>
                             </div>
                             <div className="text-indigo-500 text-base font-semibold font-['Inter'] leading-tight">Call</div>
                         </div>
@@ -82,20 +81,18 @@ const MessageMain: React.FC<MessageMainProps> = ({ selectedUser, messages, onSen
                                     }`}
                                 >
                                     {message.sender !== selectedUser && message.to !== selectedUser && (
-                                        <img className="w-10 h-10 relative rounded-lg" src="https://via.placeholder.com/40x40" alt="user" />
+                                        <img className="w-10 h-10 relative rounded-lg" src="https://via.placeholder.com/40x40" alt="user"/>
                                     )}
-                                    <div
-                                        className={`max-w-[70%] p-4 rounded-lg ${
-                                            message.sender === selectedUser || message.to === selectedUser ? 'bg-zinc-100 text-black' : 'bg-zinc-100 text-black'
-                                        }`}
-                                    >
+                                    <div className={`max-w-[70%] p-4 rounded-lg ${
+                                        message.sender === selectedUser || message.to === selectedUser ? 'bg-zinc-100 text-black' : 'bg-zinc-100 text-black'
+                                    }`}>
                                         <div className="text-sm font-normal font-['Inter'] leading-[21px]">{message.mes}</div>
                                         <div className="text-xs text-gray-500 mt-2">
                                             {new Date(message.createAt).toLocaleString()}
                                         </div>
                                     </div>
                                     {message.sender === selectedUser || message.to === selectedUser && (
-                                        <img className="w-10 h-10 relative rounded-lg" src="https://via.placeholder.com/40x40" alt="user" />
+                                        <img className="w-10 h-10 relative rounded-lg" src="https://via.placeholder.com/40x40" alt="user"/>
                                     )}
                                 </div>
                             ))
@@ -108,18 +105,18 @@ const MessageMain: React.FC<MessageMainProps> = ({ selectedUser, messages, onSen
                 </div>
                 <div className="self-stretch p-6 justify-start items-center gap-6 inline-flex">
                     <div className="w-6 h-6 relative">
-                        <FontAwesomeIcon icon={faLink} />
+                        <FontAwesomeIcon icon={faLink}/>
                     </div>
                     <div className="grow shrink basis-0 h-12 px-5 py-2.5 bg-white rounded-xl border-2 border-slate-200 justify-between items-center flex">
                         <input
                             className="w-full bg-transparent outline-none text-black text-sm font-normal font-['Inter'] leading-[21px]"
-                            placeholder="Type a message"
+                            placeholder="Nhập tin nhắn..."
                             value={inputMessage}
                             onChange={(e) => setInputMessage(e.target.value)}
                             onKeyDown={handleKeyDown}
                         />
                         <div className="w-6 h-6 relative cursor-pointer" onClick={handleSendMessage}>
-                            <FontAwesomeIcon icon={faPaperPlane} />
+                            <FontAwesomeIcon icon={faPaperPlane}/>
                         </div>
                     </div>
                 </div>

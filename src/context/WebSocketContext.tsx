@@ -1,15 +1,17 @@
+// src/websocket/WebSocketProvider.tsx
+
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import WebSocketService from '../websocket/Websocket';
-import { PeopleChatMessage } from '../components/types';
+import WebSocketService from "../websocket/Websocket";
 
 interface WebSocketContextValue {
     sendMessage: (message: any) => void;
     lastMessage: any;
     isLoggedIn: boolean;
     setLoggedIn: (loggedIn: boolean) => void;
-    userList: any[]; // Danh sách người dùng
-    createRoom: (roomName: string) => void; // Thêm hàm createRoom
-    fetchPeopleChatMessages: (userName: string, page: number) => Promise<PeopleChatMessage[]>; // Change return type to Promise
+    userList: any[];
+    createRoom: (roomName: string) => void;
+    fetchPeopleChatMessages: (userName: string, page: number) => Promise<any[]>;
+    sendChatMessage: (type: string, to: string, mes: string) => void; // Thêm sendChatMessage vào context
     onMessage: (listener: (message: any) => void) => void;
 }
 
@@ -30,20 +32,18 @@ interface WebSocketProviderProps {
 export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }) => {
     const [lastMessage, setLastMessage] = useState<any>(null);
     const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
-    const [userList, setUserList] = useState<any[]>([]); // State để lưu danh sách người dùng
-    const webSocketServiceInstance = WebSocketService.getInstance();
+    const [userList, setUserList] = useState<any[]>([]);
+    const webSocketServiceInstance = WebSocketService.getInstance(); // Thay đổi hàm khởi tạo WebSocketService theo cách thích hợp
 
     useEffect(() => {
         const messageListener = (message: any) => {
             console.log('Received message:', message);
             setLastMessage(message);
 
-            // Xử lý tin nhắn nhận được từ server
             switch (message.event) {
                 case 'GET_USER_LIST':
                     handleUserListMessage(message.data);
                     break;
-                // Xử lý các tin nhắn khác nếu cần
                 default:
                     break;
             }
@@ -63,16 +63,14 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
         webSocketServiceInstance.addMessageListener('login', loginListener);
         webSocketServiceInstance.addMessageListener('logout', logoutListener);
 
-        // Clean up listeners
         return () => {
             webSocketServiceInstance.removeMessageListener('message', messageListener);
             webSocketServiceInstance.removeMessageListener('login', loginListener);
             webSocketServiceInstance.removeMessageListener('logout', logoutListener);
         };
-    }, []); // Chỉ kích hoạt một lần khi component mount
+    }, []);
 
     useEffect(() => {
-        // Gọi API GET_USER_LIST khi isLoggedIn thay đổi và isLoggedIn là true
         if (isLoggedIn) {
             console.log('Fetching user list...');
             fetchUserList();
@@ -92,7 +90,6 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
         });
     };
 
-    // Xử lý tin nhắn GET_USER_LIST từ server
     const handleUserListMessage = (data: any) => {
         if (data && Array.isArray(data)) {
             setUserList(data);
@@ -105,7 +102,7 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
         webSocketServiceInstance.createRoom(roomName);
     };
 
-    const fetchPeopleChatMessages = (userName: string, page: number): Promise<PeopleChatMessage[]> => {
+    const fetchPeopleChatMessages = (userName: string, page: number): Promise<any[]> => {
         return new Promise((resolve, reject) => {
             const message = {
                 action: 'onchat',
@@ -130,11 +127,15 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
         });
     };
 
+    const sendChatMessage = (type: string, to: string, mes: string) => {
+        webSocketServiceInstance.sendChatMessage(type, to, mes);
+    };
+
     const onMessage = (listener: (message: any) => void) => {
         webSocketServiceInstance.addMessageListener('message', listener);
     };
 
-    const value = { sendMessage, lastMessage, isLoggedIn, setLoggedIn: setIsLoggedIn, userList, createRoom, fetchPeopleChatMessages, onMessage };
+    const value = { sendMessage, lastMessage, isLoggedIn, setLoggedIn: setIsLoggedIn, userList, createRoom, fetchPeopleChatMessages, sendChatMessage, onMessage };
 
     return (
         <WebSocketContext.Provider value={value}>

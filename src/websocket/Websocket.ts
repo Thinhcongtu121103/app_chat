@@ -123,6 +123,26 @@ class WebSocketService {
         };
         this.sendMessage(createRoomMessage);
     }
+
+    public sendChatMessage(type: string, to: string, mes: string) {
+        if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+            // Send SEND_CHAT message via WebSocket
+            const sendChatMessage = {
+                action: 'onchat',
+                data: {
+                    event: 'SEND_CHAT',
+                    data: {
+                        type: type,
+                        to: to,
+                        mes: mes
+                    }
+                }
+            };
+            this.sendMessage(sendChatMessage);
+        } else {
+            console.error('WebSocket connection is not open');
+        }
+    }
 }
 
 export default WebSocketService;
