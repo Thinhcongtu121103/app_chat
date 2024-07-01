@@ -52,6 +52,10 @@ const Login: React.FC<LoginProps> = ({ setIsLoggedIn }) => {
         }
     }, [isLoggedIn, navigate]);
 
+    const handleSignUpClick = () => {
+        navigate('/register');
+    };
+
     return (
         <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
             <div className="sm:mx-auto sm:w-full sm:max-w-sm">
@@ -91,7 +95,7 @@ const Login: React.FC<LoginProps> = ({ setIsLoggedIn }) => {
                                 Password
                             </label>
                             <div className="text-sm">
-                                <a href="#" className="font-semibold text-indigo-600 hover:text-indigo-500">
+                                <a href="#" className="font-semibold text-indigo-600 hover:text-indigo-500" onClick={handleSignUpClick}>
                                     Forgot password?
                                 </a>
                             </div>
@@ -122,8 +126,8 @@ const Login: React.FC<LoginProps> = ({ setIsLoggedIn }) => {
 
                 <p className="mt-10 text-center text-sm text-gray-500">
                     Not a member?{' '}
-                    <a href="#" className="font-semibold leading-6 text-indigo-600 hover:text-indigo-500">
-                        Start a 14 day free trial
+                    <a href="" className="font-semibold leading-6 text-indigo-600 hover:text-indigo-500" onClick={handleSignUpClick}>
+                        Sign up now
                     </a>
                 </p>
             </div>
