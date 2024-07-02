@@ -8,11 +8,14 @@ interface WebSocketContextValue {
     lastMessage: any;
     isLoggedIn: boolean;
     setLoggedIn: (loggedIn: boolean) => void;
+    logout: () => void;
+    register: (username: string, password: string) => void;
     userList: any[];
     createRoom: (roomName: string) => void;
     fetchPeopleChatMessages: (userName: string, page: number) => Promise<any[]>;
     sendChatMessage: (type: string, to: string, mes: string) => void; // Thêm sendChatMessage vào context
     onMessage: (listener: (message: any) => void) => void;
+    checkUserOnline: (username: string) => Promise<boolean>;
 }
 
 const WebSocketContext = createContext<WebSocketContextValue | null>(null);
@@ -135,7 +138,19 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
         webSocketServiceInstance.addMessageListener('message', listener);
     };
 
-    const value = { sendMessage, lastMessage, isLoggedIn, setLoggedIn: setIsLoggedIn, userList, createRoom, fetchPeopleChatMessages, sendChatMessage, onMessage };
+    const checkUserOnline = (username: string): Promise<boolean> => {
+        return webSocketServiceInstance.checkUserOnline(username);
+    };
+
+    const logout = () => {
+        webSocketServiceInstance.logout();
+    };
+
+    const register = (username: string, password: string) => {
+        webSocketServiceInstance.register(username, password);
+    };
+
+    const value = { sendMessage, lastMessage, isLoggedIn, setLoggedIn: setIsLoggedIn, logout, register, userList, createRoom, fetchPeopleChatMessages, sendChatMessage, onMessage, checkUserOnline  };
 
     return (
         <WebSocketContext.Provider value={value}>

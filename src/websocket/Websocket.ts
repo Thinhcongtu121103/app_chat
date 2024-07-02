@@ -66,6 +66,43 @@ class WebSocketService {
         }
     }
 
+    public logout() {
+        if (!this.socket || this.socket.readyState !== WebSocket.OPEN) {
+            console.error('WebSocket connection is not open');
+            return;
+        }
+
+        const logoutMessage = {
+            action: 'onchat',
+            data: {
+                event: 'LOGOUT'
+            }
+        };
+
+        this.sendMessage(logoutMessage);
+    }
+
+    public register(username: string, password: string) {
+        if (!this.socket || this.socket.readyState !== WebSocket.OPEN) {
+            console.error('WebSocket connection is not open');
+            return;
+        }
+
+        // Send register message via WebSocket
+        const registerMessage = {
+            action: 'onchat',
+            data: {
+                event: 'REGISTER',
+                data: {
+                    user: username,
+                    pass: password
+                }
+            }
+        };
+        this.sendMessage(registerMessage);
+    }
+
+
     public addMessageListener(event: string, listener: (data: any) => void) {
         if (!this.listeners[event]) {
             this.listeners[event] = [];
@@ -143,6 +180,37 @@ class WebSocketService {
             console.error('WebSocket connection is not open');
         }
     }
+
+    public checkUserOnline(username: string): Promise<boolean> {
+        return new Promise((resolve, reject) => {
+            if (!this.socket || this.socket.readyState !== WebSocket.OPEN) {
+                console.error('WebSocket connection is not open');
+                reject('WebSocket connection is not open');
+                return;
+            }
+
+            const checkUserMessage = {
+                action: 'onchat',
+                data: {
+                    event: 'CHECK_USER',
+                    data: {
+                        user: username
+                    }
+                }
+            };
+
+            const listener = (data: any) => {
+                if (data.event === 'CHECK_USER' && data.status === 'success' && data.data && data.data.status !== undefined) {
+                    resolve(data.data.status); // Assuming data.data.status is a boolean
+                    this.removeMessageListener('message', listener); // Remove listener once resolved
+                }
+            };
+
+            this.addMessageListener('message', listener);
+            this.sendMessage(checkUserMessage);
+        });
+    }
+
 }
 
 export default WebSocketService;

@@ -67,23 +67,16 @@ const UserInfo = styled.div`
 export default function VerticalTabs() {
     const [value, setValue] = React.useState(0);
     const [openDialog, setOpenDialog] = useState(false); // State for dialog open/close
-    const { sendMessage } = useWebSocket();
+    const { sendMessage, logout } = useWebSocket();
     const navigate = useNavigate();
     const handleChange = (event: React.SyntheticEvent, newValue: number) => {
         setValue(newValue);
     };
     const handleLogout = () => {
-        sendMessage({
-            action: 'onchat',
-            data: {
-                event: 'LOGOUT'
-            }
-        });
-
-        // Example: Reset value to 0 and navigate to login page
+        logout();
         setValue(0);
         navigate('/login');
-        window.location.reload();
+        window.location.reload(); // Optional: Reload the page after logout
     };
     const handleOpenDialog = () => {
         setOpenDialog(true);

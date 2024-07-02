@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useWebSocket } from '../context/WebSocketContext';
 
 const Register: React.FC = () => {
-    const { sendMessage, lastMessage } = useWebSocket();
+    const { sendMessage, lastMessage, register } = useWebSocket();
     const navigate = useNavigate();
 
     const [username, setUsername] = useState('');
@@ -22,16 +22,7 @@ const Register: React.FC = () => {
         event.preventDefault();
 
         // Gửi yêu cầu API đăng ký
-        sendMessage({
-            action: 'onchat',
-            data: {
-                event: 'REGISTER',
-                data: {
-                    user: username,
-                    pass: password
-                }
-            }
-        });
+        register(username, password);
     };
 
     // Xử lý phản hồi từ API
