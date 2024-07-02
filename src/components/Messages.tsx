@@ -131,17 +131,16 @@ const MessagesComponent: React.FC<MessagesComponentProps> = ({ onSelectUser }) =
                     >
                         <div className="px-6 py-3 justify-start items-center gap-2.5 flex">
                             <div className="w-11 h-11 relative">
-                                <div className="w-11 h-11 left-0 top-0 absolute bg-gray-200 rounded-full" />
-                                <div className="w-[18px] h-[18px] left-[30px] top-[30px] absolute bg-white border border-white rounded-full" />
-                                <div className="w-[14px] h-[14px] left-[32px] top-[32px] absolute bg-green-400 rounded-full" />
+                                <img className="w-10 h-10 relative rounded-[10px]"
+                                     src="https://via.placeholder.com/40x40" alt="user"/>
                             </div>
                             <div className="flex-col justify-start items-start gap-1 flex">
-                                <div className="text-neutral-900 text-base font-semibold font-['Inter'] leading-normal">
+                            <div className="text-neutral-900 text-base font-semibold font-['Inter'] leading-normal">
                                     {user.name}
                                 </div>
-                                <div className="text-neutral-700 text-sm font-normal font-['Inter'] leading-tight">
-                                    Online
-                                </div>
+                                {/*<div className="text-neutral-700 text-sm font-normal font-['Inter'] leading-tight">*/}
+                                {/*    Online*/}
+                                {/*</div>*/}
                             </div>
                         </div>
                     </div>

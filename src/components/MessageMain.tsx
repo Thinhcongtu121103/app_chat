@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPaperPlane, faPhone, faLink } from '@fortawesome/free-solid-svg-icons';
 import styled from 'styled-components';
@@ -29,7 +29,39 @@ type MessageMainProps = {
 
 const MessageMain: React.FC<MessageMainProps> = ({ selectedUser, messages, onSendMessage }) => {
     const [inputMessage, setInputMessage] = useState('');
-    const { sendChatMessage } = useWebSocket();
+    const { sendChatMessage, checkUserOnline } = useWebSocket();
+    const [isUserOnline, setIsUserOnline] = useState<boolean>(false);
+
+    // Function to check user online status
+    const checkOnlineStatus = () => {
+        if (selectedUser) {
+            checkUserOnline(selectedUser)
+                .then((onlineStatus) => {
+                    setIsUserOnline(onlineStatus);
+                })
+                .catch((error) => {
+                    console.error('Error checking user online status:', error);
+                    setIsUserOnline(false); // Set default to offline if there's an error
+                });
+        } else {
+            setIsUserOnline(false);
+        }
+    };
+
+    // Initial check when selectedUser changes or component mounts
+    useEffect(() => {
+        checkOnlineStatus();
+    }, [selectedUser, checkUserOnline]);
+
+    // Periodically check online status every 20 seconds
+    useEffect(() => {
+        const interval = setInterval(() => {
+            checkOnlineStatus();
+        }, 20000); // 20 seconds
+
+        // Clean up the interval when component unmounts or when selectedUser changes
+        return () => clearInterval(interval);
+    }, [selectedUser, checkUserOnline]);
 
     const handleSendMessage = () => {
         if (inputMessage.trim() && selectedUser) {
@@ -47,6 +79,8 @@ const MessageMain: React.FC<MessageMainProps> = ({ selectedUser, messages, onSen
 
     const sortedMessages = [...messages].sort((a, b) => new Date(a.createAt).getTime() - new Date(b.createAt).getTime());
 
+    const onlineStatusClassName = isUserOnline ? 'bg-green-400' : 'bg-gray-300';
+
     return (
         <MessageMainStyled>
             <div className="w-[640px] h-[700px] bg-white flex-col justify-between items-start inline-flex">
@@ -59,8 +93,10 @@ const MessageMain: React.FC<MessageMainProps> = ({ selectedUser, messages, onSen
                                     {selectedUser || 'No User available'}
                                 </div>
                                 <div className="justify-start items-center gap-2 inline-flex">
-                                    <div className="w-2.5 h-2.5 bg-green-400 rounded-full"></div>
-                                    <div className="opacity-60 text-black text-xs font-semibold font-['Inter'] leading-[18px]">Online</div>
+                                    <div className={`w-2.5 h-2.5 rounded-full ${onlineStatusClassName}`}></div>
+                                    <div className="opacity-60 text-black text-xs font-semibold font-['Inter'] leading-[18px]">
+                                        {isUserOnline ? 'Online' : 'Offline'}
+                                    </div>
                                 </div>
                             </div>
                         </div>
