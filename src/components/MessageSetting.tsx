@@ -2,8 +2,7 @@ import React from 'react'
 
 const MessageSetting = () => {
     return (
-        <div
-            className="w-[362px] h-[700px] self-stretch overflow-y-auto bg-white shadow flex-col justify-start items-start gap-6 inline-flex">
+        <div className="w-[362px] h-[700px] self-stretch overflow-y-auto bg-white shadow flex-col justify-start items-start gap-6 inline-flex">
             <div className="self-stretch h-[81px] flex-col justify-start items-start flex">
                 <div className="self-stretch h-20 p-6 justify-between items-center inline-flex">
                     <div className="justify-start items-center gap-2.5 flex">
