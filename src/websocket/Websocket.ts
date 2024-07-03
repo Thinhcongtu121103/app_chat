@@ -4,7 +4,6 @@ class WebSocketService {
     private listeners: { [key: string]: ((data: any) => void)[] } = {};
 
     private constructor() {
-        // Initialize WebSocket connection
         this.connect('ws://140.238.54.136:8080/chat/chat');
     }
 
@@ -16,29 +15,35 @@ class WebSocketService {
     }
 
     private connect(url: string) {
-        // Initialize WebSocket connection
         this.socket = new WebSocket(url);
 
-        // Handle events when connection is established
         this.socket.onopen = () => {
             console.log('WebSocket connection established');
         };
 
-        // Handle events when message is received from server
         this.socket.onmessage = (event) => {
             console.log('Received message:', event.data);
             this.notifyListeners('message', JSON.parse(event.data));
         };
 
-        // Handle events when error occurs during connection
         this.socket.onerror = (error) => {
             console.error('WebSocket error:', error);
         };
 
-        // Handle events when connection is closed
         this.socket.onclose = () => {
             console.log('WebSocket connection closed');
         };
+    }
+
+    public disconnect() {
+        if (this.socket) {
+            this.socket.close();
+        }
+    }
+
+    public reconnect() {
+        this.disconnect();
+        this.connect('ws://140.238.54.136:8080/chat/chat');
     }
 
     public login(username: string, password: string) {

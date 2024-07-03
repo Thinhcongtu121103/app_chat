@@ -14,9 +14,39 @@ const MessagesComponent: React.FC<MessagesComponentProps> = ({ onSelectUser }) =
     const [messages, setMessages] = useState<any[]>([]);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [roomCreated, setRoomCreated] = useState(false);
-    const { sendMessage, userList, createRoom, fetchPeopleChatMessages, onMessage } = useWebSocket();
-
+    const { sendMessage, userList, createRoom, fetchPeopleChatMessages, onMessage, reconnect } = useWebSocket();
+    const [reloginPerformed, setReloginPerformed] = useState(false); // Flag to track if relogin has been performed
     const [currentSelectedUser, setCurrentSelectedUser] = useState<string>(''); // State để lưu trữ người dùng hiện tại được chọn
+
+    const sendRelogin = () => {
+        sendMessage({
+            action: 'onchat',
+            data: {
+                event: 'RE_LOGIN',
+                data: { user: localStorage.getItem('username'), code: localStorage.getItem('loginCode') }
+            }
+        });
+        setReloginPerformed(true); // Set flag to true after performing relogin
+
+    };
+
+
+    useEffect(() => {
+        const loginCode = localStorage.getItem('loginCode');
+        if (loginCode != null) {
+            sendRelogin();
+            console.log('Login successful');
+            setIsLoggedIn(true);
+        } else {
+            console.log("alo");
+        }
+    }, []);
+
+    useEffect(() => {
+        if (isLoggedIn && !reloginPerformed) {
+            sendRelogin();
+        }
+    }, [isLoggedIn, reloginPerformed]);
 
     useEffect(() => {
         if (isLoggedIn) {
