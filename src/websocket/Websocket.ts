@@ -161,6 +161,23 @@ class WebSocketService {
         this.sendMessage(createRoomMessage);
     }
 
+    public joinRoom(roomName: string) {
+        if (!this.socket || this.socket.readyState !== WebSocket.OPEN) {
+            console.error('WebSocket connection is not open');
+            return;
+        }
+
+        // Send createRoom message via WebSocket
+        const joinRoomMessage = {
+            action: 'onchat',
+                data: {
+                event: 'JOIN_ROOM',
+                data: { name: roomName }
+            }
+        };
+        this.sendMessage(joinRoomMessage);
+    }
+
     public sendChatMessage(type: string, to: string, mes: string) {
         if (this.socket && this.socket.readyState === WebSocket.OPEN) {
             // Send SEND_CHAT message via WebSocket
