@@ -33,25 +33,14 @@ const Login: React.FC<LoginProps> = ({ setIsLoggedIn }) => {
             }
         });
     };
-
-    const sendRelogin = () => {
-        sendMessage({
-            action: 'onchat',
-            data: {
-                event: 'RE_LOGIN',
-                data: { user: localStorage.getItem('username'), code: localStorage.getItem('loginCode') }
-            }
-        });
-        setReloginPerformed(true);
-    };
-
+    // chuyển tab khi relogin
     useEffect(() => {
         const loginCode = localStorage.getItem('loginCode');
         if (loginCode != null) {
             setIsLoggedIn(true);
             navigate('/');
         }
-    }, [navigate, setIsLoggedIn]);
+    }, []);
 
     useEffect(() => {
         if (lastMessage && lastMessage.event === 'LOGIN') {
@@ -61,17 +50,9 @@ const Login: React.FC<LoginProps> = ({ setIsLoggedIn }) => {
                 localStorage.setItem('username', username);
                 setReloginPerformed(false);
                 navigate('/');
-            } else if (!reloginPerformed) {
-                sendRelogin();
             }
         }
-    }, [lastMessage, navigate, setIsLoggedIn, username, reloginPerformed]);
-
-    useEffect(() => {
-        if (isLoggedIn && !reloginPerformed) {
-            sendRelogin();
-        }
-    }, [isLoggedIn, reloginPerformed]);
+    }, [lastMessage, navigate, username, reloginPerformed]);
 
 
     const handleSignUpClick = () => {

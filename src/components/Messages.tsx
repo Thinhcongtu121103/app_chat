@@ -18,6 +18,7 @@ const MessagesComponent: React.FC<MessagesComponentProps> = ({ onSelectUser }) =
     const [reloginPerformed, setReloginPerformed] = useState(false); // Flag to track if relogin has been performed
     const [currentSelectedUser, setCurrentSelectedUser] = useState<string>(''); // State để lưu trữ người dùng hiện tại được chọn
 
+    // JSON relogin
     const sendRelogin = () => {
         sendMessage({
             action: 'onchat',
@@ -29,25 +30,16 @@ const MessagesComponent: React.FC<MessagesComponentProps> = ({ onSelectUser }) =
         setReloginPerformed(true); // Set flag to true after performing relogin
 
     };
-
-
+    // hàm relogin chính
     useEffect(() => {
         const loginCode = localStorage.getItem('loginCode');
+        let dem = 0;
         if (loginCode != null) {
             sendRelogin();
-            console.log('Login successful');
             setIsLoggedIn(true);
-        } else {
-            console.log("alo");
         }
+
     }, []);
-
-    useEffect(() => {
-        if (isLoggedIn && !reloginPerformed) {
-            sendRelogin();
-        }
-    }, [isLoggedIn, reloginPerformed]);
-
     useEffect(() => {
         if (isLoggedIn) {
             console.log('Fetching user list...');
