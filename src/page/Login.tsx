@@ -7,17 +7,20 @@ interface LoginProps {
 }
 
 const Login: React.FC<LoginProps> = ({ setIsLoggedIn }) => {
-    const { sendMessage, lastMessage, isLoggedIn } = useWebSocket();
+    const { sendMessage, lastMessage, isLoggedIn, reconnect, disconnect } = useWebSocket();
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const [reloginPerformed, setReloginPerformed] = useState(false);
     const navigate = useNavigate();
 
     const handleUsernameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setUsername(event.target.value);
+
     };
 
     const handlePasswordChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setPassword(event.target.value);
+
     };
 
     const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -30,27 +33,27 @@ const Login: React.FC<LoginProps> = ({ setIsLoggedIn }) => {
             }
         });
     };
+    // chuyển tab khi relogin
+    useEffect(() => {
+        const loginCode = localStorage.getItem('loginCode');
+        if (loginCode != null) {
+            setIsLoggedIn(true);
+            navigate('/');
+        }
+    }, []);
 
     useEffect(() => {
         if (lastMessage && lastMessage.event === 'LOGIN') {
             if (lastMessage.status === 'success') {
-                console.log('Login successful');
                 setIsLoggedIn(true);
                 localStorage.setItem('loginCode', lastMessage.data.RE_LOGIN_CODE);
                 localStorage.setItem('username', username);
-                localStorage.setItem('reloginPerformed', 'true'); // Đánh dấu đã thực hiện re-login
+                setReloginPerformed(false);
                 navigate('/');
-            } else {
-                console.log('Login status:', lastMessage.status);
             }
         }
-    }, [lastMessage, navigate, setIsLoggedIn, username]);
+    }, [lastMessage, navigate, username, reloginPerformed]);
 
-    useEffect(() => {
-        if (isLoggedIn) {
-            navigate('/');
-        }
-    }, [isLoggedIn, navigate]);
 
     const handleSignUpClick = () => {
         navigate('/register');
@@ -113,7 +116,6 @@ const Login: React.FC<LoginProps> = ({ setIsLoggedIn }) => {
                             />
                         </div>
                     </div>
-
                     <div>
                         <button
                             type="submit"
@@ -123,7 +125,6 @@ const Login: React.FC<LoginProps> = ({ setIsLoggedIn }) => {
                         </button>
                     </div>
                 </form>
-
                 <p className="mt-10 text-center text-sm text-gray-500">
                     Not a member?{' '}
                     <a href="" className="font-semibold leading-6 text-indigo-600 hover:text-indigo-500" onClick={handleSignUpClick}>

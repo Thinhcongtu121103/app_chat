@@ -10,7 +10,7 @@ import ContactPageIcon from '@mui/icons-material/ContactPage';
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
 import SettingsIcon from '@mui/icons-material/Settings';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
-import Setting from '../components/Setting'
+import Setting from '../components/Setting';
 import MessageMain from "../components/MessageMain";
 import Messages from "../components/Messages";
 import MessageSetting from "../components/MessageSetting";
@@ -73,6 +73,9 @@ export default function VerticalTabs() {
         setValue(newValue);
     };
     const handleLogout = () => {
+        localStorage.removeItem("loginCode");
+        localStorage.removeItem("username");
+        localStorage.removeItem("reloginPerformed");
         sendMessage({
             action: 'onchat',
             data: {
