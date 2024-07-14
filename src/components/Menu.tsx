@@ -122,13 +122,11 @@ export default function VerticalTabs() {
             </Tabs>
             <TabPanel value={value} index={0}>
                 <Chat/>
-
             </TabPanel>
             <TabPanel value={value} index={1}>
                 <Setting/>
             </TabPanel>
             <TabPanel value={value} index={2}>
-                3
             </TabPanel>
             <TabPanel value={value} index={3}>
                 <Setting/>

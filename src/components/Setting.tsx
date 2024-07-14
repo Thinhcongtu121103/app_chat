@@ -22,7 +22,7 @@ import backgroundImage from '../assets/backgroundImage.png'
 
 
 const Container = styled.div`
-    width: 400px;
+    width: 440px;
     padding: 20px;
     box-shadow: 0 0 10px rgba(0,0,0,0.1);
     background-color: white;

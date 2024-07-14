@@ -6,12 +6,14 @@ interface LoginProps {
     setIsLoggedIn: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
+
 const Login: React.FC<LoginProps> = ({ setIsLoggedIn }) => {
     const { sendMessage, lastMessage, isLoggedIn, reconnect, disconnect } = useWebSocket();
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [reloginPerformed, setReloginPerformed] = useState(false);
     const navigate = useNavigate();
+
 
     const handleUsernameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setUsername(event.target.value);
