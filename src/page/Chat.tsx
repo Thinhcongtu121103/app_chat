@@ -1,8 +1,12 @@
+
 import React, {useEffect, useState} from 'react';
 import styled from 'styled-components';
 import MessagesComponent from '../components/Messages';
 import MessageMain from '../components/MessageMain';
 import MessageSetting from '../components/MessageSetting';
+import { useWebSocket } from "../context/WebSocketContext";
+import { database } from '../firebase'; // Import ứng dụng Firebase đã khởi tạo
+import { ref, query, orderByChild, equalTo, get } from "firebase/database";
 
 const ChatContainer = styled.div`
     position: absolute;
@@ -12,7 +16,7 @@ const ChatContainer = styled.div`
     width: 1340px;
     height: 700px;
     overflow: hidden;
-    display: flex; /* Thêm display: flex để các phần tử bên trong tự căn chỉnh */
+    display: flex;
 `;
 
 type Message = {
@@ -22,8 +26,6 @@ type Message = {
     createAt: string;
     to: string;
 };
-
-
 type RoomChatData = {
     id: number;
     name: string;
@@ -31,7 +33,6 @@ type RoomChatData = {
     userList: { id: number; name: string }[];
     chatData: Message[];
 };
-
 const Chat = () => {
     const [selectedUser, setSelectedUser] = useState<string | null>(null);
     const [selectedRoom, setSelectedRoom] = useState<string | null>(null);
@@ -50,7 +51,6 @@ const Chat = () => {
             console.error('No username found in localStorage');
         }
     }, []);
-
     const handleSelectUser = (userName: string, userMessages: Message[]) => {
         if (userName && userName.trim() !== '' && userMessages.length > 0) {
             setSelectedUser(userName);

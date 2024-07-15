@@ -1,7 +1,5 @@
-// src/websocket/WebSocketProvider.tsx
-
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import WebSocketService from "../websocket/Websocket";
+import WebSocketService from '../websocket/Websocket';
 
 interface WebSocketContextValue {
     sendMessage: (message: any) => void;
@@ -19,6 +17,7 @@ interface WebSocketContextValue {
     onMessage: (listener: (message: any) => void) => void;
     checkUserOnline: (username: string) => Promise<boolean>;
     getUserListMessage: () => void; // Thêm getUserListMessage vào context
+
 }
 
 const WebSocketContext = createContext<WebSocketContextValue | null>(null);
@@ -39,7 +38,7 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
     const [lastMessage, setLastMessage] = useState<any>(null);
     const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
     const [userList, setUserList] = useState<any[]>([]);
-    const webSocketServiceInstance = WebSocketService.getInstance(); // Thay đổi hàm khởi tạo WebSocketService theo cách thích hợp
+    const webSocketServiceInstance = WebSocketService.getInstance();
 
     useEffect(() => {
         const messageListener = (message: any) => {
@@ -74,7 +73,7 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
             webSocketServiceInstance.removeMessageListener('login', loginListener);
             webSocketServiceInstance.removeMessageListener('logout', logoutListener);
         };
-    }, []);
+    }, [webSocketServiceInstance]);
 
     useEffect(() => {
         if (isLoggedIn) {
@@ -187,6 +186,7 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
     };
 
     const value = { sendMessage, lastMessage, isLoggedIn, setLoggedIn: setIsLoggedIn, logout, register, userList, createRoom, joinRoom, fetchPeopleChatMessages, fetchRoomChatMessages, sendChatMessage, onMessage, checkUserOnline, getUserListMessage  };
+
 
     return (
         <WebSocketContext.Provider value={value}>

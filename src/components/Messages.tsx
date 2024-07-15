@@ -19,9 +19,31 @@ const MessagesComponent: React.FC<MessagesComponentProps> = ({ onSelectUser, onS
     const [roomCreated, setRoomCreated] = useState(false);
     const [roomJoined, setRoomJoined] = useState(false);
     const { sendMessage, userList, createRoom, joinRoom, fetchPeopleChatMessages, fetchRoomChatMessages, onMessage } = useWebSocket();
-
     const [currentSelected, setCurrentSelected] = useState<string>(''); // State để lưu trữ người dùng hiện tại được chọn
 
+
+    // JSON relogin
+    const sendRelogin = () => {
+        sendMessage({
+            action: 'onchat',
+            data: {
+                event: 'RE_LOGIN',
+                data: { user: localStorage.getItem('username'), code: localStorage.getItem('loginCode') }
+            }
+        });
+        setReloginPerformed(true); // Set flag to true after performing relogin
+
+    };
+    // hàm relogin chính
+    useEffect(() => {
+        const loginCode = localStorage.getItem('loginCode');
+        let dem = 0;
+        if (loginCode != null) {
+            sendRelogin();
+            setIsLoggedIn(true);
+        }
+
+    }, []);
     useEffect(() => {
         if (isLoggedIn) {
             console.log('Fetching user list...');

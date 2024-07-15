@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import Box from '@mui/material/Box';
 import {Tab, Tabs, Typography} from "@mui/material";
 import Avatar from "@mui/material/Avatar";
@@ -10,7 +10,7 @@ import ContactPageIcon from '@mui/icons-material/ContactPage';
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
 import SettingsIcon from '@mui/icons-material/Settings';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
-import Setting from '../components/Setting'
+import Setting from '../components/Setting';
 import MessageMain from "../components/MessageMain";
 import Messages from "../components/Messages";
 import MessageSetting from "../components/MessageSetting";
@@ -23,6 +23,10 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
+import {getDownloadURL, getStorage, ref} from "firebase/storage";
+import {database} from "../firebase";
+import {equalTo, get, orderByChild, query} from "firebase/database";
+import Profile from "./Profile";
 
 interface TabPanelProps {
     children?: React.ReactNode;
@@ -69,6 +73,21 @@ export default function VerticalTabs() {
     const [openDialog, setOpenDialog] = useState(false); // State for dialog open/close
     const { sendMessage, logout } = useWebSocket();
     const navigate = useNavigate();
+    const [avatarURL, setAvatarURL] = useState<string | null>(null); // State để lưu URL của Avatar
+    const storage = getStorage();
+    const pathReference = ref(storage,'' + localStorage.getItem('img'));
+
+    useEffect(() => {
+        if (pathReference) {
+            getDownloadURL(pathReference)
+                .then(url => {
+                    setAvatarURL(url);
+                })
+                .catch(error => {
+                    console.error('Error getting download URL:', error);
+                });
+        }
+    }, [pathReference]);
     const handleChange = (event: React.SyntheticEvent, newValue: number) => {
         setValue(newValue);
     };
@@ -99,10 +118,12 @@ export default function VerticalTabs() {
                 sx={{ borderRight: 1, borderColor: 'divider' }}
             >
                 <UserInfo>
-                    <Avatar
-                        src={avatarImage}
-                        sx={{ width: 50, height: 50 }}
-                    />
+                    {avatarURL && (
+                        <Avatar
+                            src={avatarURL}
+                            sx={{ width: 50, height: 50 }}
+                        />
+                    )}
                 </UserInfo>
                 <Divider/>
                 <Tab icon={<ChatBubbleOutlineIcon/>} aria-label='message' value={0} />
@@ -112,13 +133,12 @@ export default function VerticalTabs() {
             </Tabs>
             <TabPanel value={value} index={0}>
                 <Chat/>
-
             </TabPanel>
             <TabPanel value={value} index={1}>
                 <Setting/>
             </TabPanel>
             <TabPanel value={value} index={2}>
-                3
+                <Profile/>
             </TabPanel>
             <TabPanel value={value} index={3}>
                 <Setting/>
