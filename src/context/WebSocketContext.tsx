@@ -6,13 +6,18 @@ interface WebSocketContextValue {
     lastMessage: any;
     isLoggedIn: boolean;
     setLoggedIn: (loggedIn: boolean) => void;
+    logout: () => void;
+    register: (username: string, password: string) => void;
     userList: any[];
     createRoom: (roomName: string) => void;
+    joinRoom: (roomName: string) => void;
     fetchPeopleChatMessages: (userName: string, page: number) => Promise<any[]>;
-    sendChatMessage: (type: string, to: string, mes: string) => void;
+    fetchRoomChatMessages: (roomName: string, page: number) => Promise<any[]>;
+    sendChatMessage: (type: string, to: string, mes: string) => void; // Thêm sendChatMessage vào context
     onMessage: (listener: (message: any) => void) => void;
-    disconnect: () => void;
-    reconnect: () => void;
+    checkUserOnline: (username: string) => Promise<boolean>;
+    getUserListMessage: () => void; // Thêm getUserListMessage vào context
+
 }
 
 const WebSocketContext = createContext<WebSocketContextValue | null>(null);
@@ -102,6 +107,10 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
         webSocketServiceInstance.createRoom(roomName);
     };
 
+    const joinRoom = (roomName: string) => {
+        webSocketServiceInstance.joinRoom(roomName);
+    };
+
     const fetchPeopleChatMessages = (userName: string, page: number): Promise<any[]> => {
         return new Promise((resolve, reject) => {
             const message = {
@@ -127,6 +136,31 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
         });
     };
 
+    const fetchRoomChatMessages = (roomName: string, page: number): Promise<any[]> => {
+        return new Promise((resolve, reject) => {
+            const message = {
+                action: 'onchat',
+                data: {
+                    event: 'GET_ROOM_CHAT_MES',
+                    data: {
+                        name: roomName,
+                        page: page
+                    }
+                }
+            };
+
+            const messageListener = (response: any) => {
+                if (response.event === 'GET_ROOM_CHAT_MES' && response.data.name === roomName) {
+                    resolve(response.data.messages);
+                    webSocketServiceInstance.removeMessageListener('message', messageListener);
+                }
+            };
+
+            webSocketServiceInstance.addMessageListener('message', messageListener);
+            sendMessage(message);
+        });
+    };
+
     const sendChatMessage = (type: string, to: string, mes: string) => {
         webSocketServiceInstance.sendChatMessage(type, to, mes);
     };
@@ -135,27 +169,24 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
         webSocketServiceInstance.addMessageListener('message', listener);
     };
 
-    const disconnect = () => {
-        webSocketServiceInstance.disconnect();
+    const checkUserOnline = (username: string): Promise<boolean> => {
+        return webSocketServiceInstance.checkUserOnline(username);
     };
 
-    const reconnect = () => {
-        webSocketServiceInstance.reconnect();
+    const logout = () => {
+        webSocketServiceInstance.logout();
     };
 
-    const value = {
-        sendMessage,
-        lastMessage,
-        isLoggedIn,
-        setLoggedIn: setIsLoggedIn,
-        userList,
-        createRoom,
-        fetchPeopleChatMessages,
-        sendChatMessage,
-        onMessage,
-        disconnect,
-        reconnect
+    const register = (username: string, password: string) => {
+        webSocketServiceInstance.register(username, password);
     };
+
+    const getUserListMessage = () => {
+        webSocketServiceInstance.getUserList();
+    };
+
+    const value = { sendMessage, lastMessage, isLoggedIn, setLoggedIn: setIsLoggedIn, logout, register, userList, createRoom, joinRoom, fetchPeopleChatMessages, fetchRoomChatMessages, sendChatMessage, onMessage, checkUserOnline, getUserListMessage  };
+
 
     return (
         <WebSocketContext.Provider value={value}>
