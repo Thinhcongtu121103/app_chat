@@ -1,22 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCirclePlus } from '@fortawesome/free-solid-svg-icons';
+import { faCirclePlus, faDoorOpen } from '@fortawesome/free-solid-svg-icons'; // Import biểu tượng Join Room
 import { useWebSocket } from '../context/WebSocketContext';
 
 type MessagesComponentProps = {
     onSelectUser: (userName: string, messages: any[]) => void;
+    onSelectRoom: (roomName: string, messages: any[]) => void;
     showUserSelection: boolean;
 };
 
-const MessagesComponent: React.FC<MessagesComponentProps> = ({ onSelectUser }) => {
-    const [isPopupOpen, setIsPopupOpen] = useState(false);
+const MessagesComponent: React.FC<MessagesComponentProps> = ({ onSelectUser, onSelectRoom }) => {
+    const [isCreatePopupOpen, setIsCreatePopupOpen] = useState(false);
+    const [isJoinPopupOpen, setIsJoinPopupOpen] = useState(false);
     const [roomName, setRoomName] = useState('');
+    const [joinRoomName, setJoinRoomName] = useState(''); // State cho việc tham gia phòng
     const [messages, setMessages] = useState<any[]>([]);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [roomCreated, setRoomCreated] = useState(false);
-    const { sendMessage, userList, createRoom, fetchPeopleChatMessages, onMessage, reconnect } = useWebSocket();
-    const [reloginPerformed, setReloginPerformed] = useState(false); // Flag to track if relogin has been performed
-    const [currentSelectedUser, setCurrentSelectedUser] = useState<string>(''); // State để lưu trữ người dùng hiện tại được chọn
+    const [roomJoined, setRoomJoined] = useState(false);
+    const { sendMessage, userList, createRoom, joinRoom, fetchPeopleChatMessages, fetchRoomChatMessages, onMessage } = useWebSocket();
+    const [currentSelected, setCurrentSelected] = useState<string>(''); // State để lưu trữ người dùng hiện tại được chọn
+
 
     // JSON relogin
     const sendRelogin = () => {
@@ -66,17 +70,39 @@ const MessagesComponent: React.FC<MessagesComponentProps> = ({ onSelectUser }) =
     }, [roomCreated, sendMessage]);
 
     useEffect(() => {
+        if (roomJoined) {
+            console.log('Room created, fetching user list again...');
+            sendMessage({
+                action: 'onchat',
+                data: {
+                    event: 'GET_USER_LIST'
+                }
+            });
+            setRoomCreated(false);
+        }
+    }, [roomJoined, sendMessage]);
+
+    useEffect(() => {
         const handleNewMessage = (data: any) => {
             if (data.event === 'GET_PEOPLE_CHAT_MES') {
                 if (data.data && data.data.length > 0) {
-                    onSelectUser(currentSelectedUser, data.data);
+                    onSelectRoom("", []);
+                    onSelectUser(currentSelected, data.data);
                 } else {
                     onSelectUser('', []);
+                }
+            } else if (data.event === 'GET_ROOM_CHAT_MES') {
+                if (data.data) {
+                    console.log('CurrentSelected:', currentSelected);
+                    onSelectUser("", []);
+                    onSelectRoom(currentSelected, data.data.chatData);
+                } else {
+                    onSelectRoom('', []);
                 }
             }
 
             // Kiểm tra xem tin nhắn mới nhận có phải của người dùng hiện tại hay không
-            if (data.sender === currentSelectedUser || data.to === currentSelectedUser) {
+            if (data.sender === currentSelected || data.to === currentSelected) {
                 // Xử lý tin nhắn mới ở đây (ví dụ: cập nhật state messages)
             }
         };
@@ -86,21 +112,32 @@ const MessagesComponent: React.FC<MessagesComponentProps> = ({ onSelectUser }) =
         return () => {
             // Cleanup listener
         };
-    }, [onMessage, onSelectUser, currentSelectedUser]);
+    }, [onMessage, onSelectUser, currentSelected, onSelectRoom]);
 
-    const togglePopup = () => {
-        setIsPopupOpen(!isPopupOpen);
+    const toggleCreatePopup = () => {
+        setIsCreatePopupOpen(!isCreatePopupOpen);
+    };
+
+    const toggleJoinPopup = () => {
+        setIsJoinPopupOpen(!isJoinPopupOpen);
     };
 
     const handleCreateRoom = () => {
         createRoom(roomName);
         setRoomCreated(true);
-        setIsPopupOpen(false);
+        setIsCreatePopupOpen(false);
         setRoomName('');
     };
 
+    const handleJoinRoom = () => {
+        joinRoom(joinRoomName);
+        setRoomJoined(true);
+        setIsJoinPopupOpen(false);
+        setJoinRoomName('');
+    };
+
     const handleUserClick = (userName: string) => {
-        setCurrentSelectedUser(userName); // Cập nhật người dùng hiện tại được chọn
+        setCurrentSelected(userName); // Cập nhật người dùng hiện tại được chọn
         fetchPeopleChatMessages(userName, 1)
             .then(messages => {
                 setMessages(messages);
@@ -108,6 +145,25 @@ const MessagesComponent: React.FC<MessagesComponentProps> = ({ onSelectUser }) =
             .catch(() => {
                 alert('User is unavailable');
             });
+    };
+
+    const handleRoomClick = (roomName: string) => {
+        setCurrentSelected(roomName);// Cập nhật người dùng hiện tại được chọn
+        fetchRoomChatMessages(roomName, 1)
+            .then(messages => {
+                setMessages(messages);
+            })
+            .catch(() => {
+                alert('User is unavailable');
+            });
+    };
+
+    const handleClick = (name: string) => {
+        if (name.startsWith('Room')) {
+            handleRoomClick(name);
+        } else {
+            handleUserClick(name);
+        }
     };
 
     useEffect(() => {
@@ -129,11 +185,19 @@ const MessagesComponent: React.FC<MessagesComponentProps> = ({ onSelectUser }) =
                             <div className="text-black text-xs font-semibold font-['Inter'] leading-[18px]">{userList.length}</div>
                         </div>
                     </div>
-                    <div
-                        className="flex items-center justify-center w-16 h-16 relative text-blue-500 text-3xl cursor-pointer"
-                        onClick={togglePopup}
-                    >
-                        <FontAwesomeIcon icon={faCirclePlus} />
+                    <div className="flex items-center space-x-4">
+                        <div
+                            className="flex items-center justify-center w-16 h-16 relative text-blue-500 text-3xl cursor-pointer"
+                            onClick={toggleCreatePopup}
+                        >
+                            <FontAwesomeIcon icon={faCirclePlus} />
+                        </div>
+                        <div
+                            className="flex items-center justify-center w-16 h-16 relative text-green-500 text-3xl cursor-pointer"
+                            onClick={toggleJoinPopup}
+                        >
+                            <FontAwesomeIcon icon={faDoorOpen} />
+                        </div>
                     </div>
                 </div>
             </div>
@@ -149,27 +213,26 @@ const MessagesComponent: React.FC<MessagesComponentProps> = ({ onSelectUser }) =
                     <div
                         key={index}
                         className="self-stretch justify-between items-center inline-flex cursor-pointer"
-                        onClick={() => handleUserClick(user.name)}
+                        onClick={() => handleClick(user.name)}
                     >
                         <div className="px-6 py-3 justify-start items-center gap-2.5 flex">
                             <div className="w-11 h-11 relative">
-                                <div className="w-11 h-11 left-0 top-0 absolute bg-gray-200 rounded-full" />
-                                <div className="w-[18px] h-[18px] left-[30px] top-[30px] absolute bg-white border border-white rounded-full" />
-                                <div className="w-[14px] h-[14px] left-[32px] top-[32px] absolute bg-green-400 rounded-full" />
+                                <img className="w-10 h-10 relative rounded-[10px]"
+                                     src="https://via.placeholder.com/40x40" alt="user"/>
                             </div>
                             <div className="flex-col justify-start items-start gap-1 flex">
                                 <div className="text-neutral-900 text-base font-semibold font-['Inter'] leading-normal">
                                     {user.name}
                                 </div>
-                                <div className="text-neutral-700 text-sm font-normal font-['Inter'] leading-tight">
-                                    Online
-                                </div>
+                                {/*<div className="text-neutral-700 text-sm font-normal font-['Inter'] leading-tight">*/}
+                                {/*    Online*/}
+                                {/*</div>*/}
                             </div>
                         </div>
                     </div>
                 ))}
             </div>
-            {isPopupOpen && (
+            {isCreatePopupOpen && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                     <div className="bg-white p-6 rounded-md shadow-md w-80">
                         <h2 className="text-lg font-semibold mb-4">Create New Room</h2>
@@ -182,13 +245,47 @@ const MessagesComponent: React.FC<MessagesComponentProps> = ({ onSelectUser }) =
                         />
                         <button
                             onClick={handleCreateRoom}
-                            className="bg-blue-500 text-white rounded-md px-4 py-2"
+                            className="bg-blue-500 text-white rounded-md px-4 py-2 mr-2"
                         >
                             Create Room
+                        </button>
+                        <button
+                            onClick={() => setIsCreatePopupOpen(false)}
+                            className="bg-gray-300 text-gray-700 rounded-md px-4 py-2"
+                        >
+                            Cancel
                         </button>
                     </div>
                 </div>
             )}
+
+            {isJoinPopupOpen && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white p-6 rounded-md shadow-md w-80">
+                        <h2 className="text-lg font-semibold mb-4">Join Room</h2>
+                        <input
+                            type="text"
+                            value={joinRoomName}
+                            onChange={(e) => setJoinRoomName(e.target.value)}
+                            className="border border-gray-300 rounded-md p-2 w-full mb-4"
+                            placeholder="Enter room name to join"
+                        />
+                        <button
+                            onClick={handleJoinRoom}
+                            className="bg-green-500 text-white rounded-md px-4 py-2 mr-2"
+                        >
+                            Join Room
+                        </button>
+                        <button
+                            onClick={() => setIsJoinPopupOpen(false)}
+                            className="bg-gray-300 text-gray-700 rounded-md px-4 py-2"
+                        >
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            )}
+
         </div>
     );
 };

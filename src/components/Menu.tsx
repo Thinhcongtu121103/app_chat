@@ -71,7 +71,7 @@ const UserInfo = styled.div`
 export default function VerticalTabs() {
     const [value, setValue] = React.useState(0);
     const [openDialog, setOpenDialog] = useState(false); // State for dialog open/close
-    const { sendMessage } = useWebSocket();
+    const { sendMessage, logout } = useWebSocket();
     const navigate = useNavigate();
     const [avatarURL, setAvatarURL] = useState<string | null>(null); // State để lưu URL của Avatar
     const storage = getStorage();
@@ -92,22 +92,10 @@ export default function VerticalTabs() {
         setValue(newValue);
     };
     const handleLogout = () => {
-        localStorage.removeItem("loginCode");
-        localStorage.removeItem("username");
-        localStorage.removeItem("reloginPerformed");
-        localStorage.removeItem("currentUserName");
-        localStorage.removeItem("img");
-        sendMessage({
-            action: 'onchat',
-            data: {
-                event: 'LOGOUT'
-            }
-        });
-
-        // Example: Reset value to 0 and navigate to login page
+        logout();
         setValue(0);
         navigate('/login');
-        window.location.reload();
+        window.location.reload(); // Optional: Reload the page after logout
     };
     const handleOpenDialog = () => {
         setOpenDialog(true);
