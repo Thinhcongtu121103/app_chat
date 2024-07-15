@@ -1,8 +1,11 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import MessagesComponent from '../components/Messages';
 import MessageMain from '../components/MessageMain';
 import MessageSetting from '../components/MessageSetting';
+import { useWebSocket } from "../context/WebSocketContext";
+import { database } from '../firebase'; // Import ứng dụng Firebase đã khởi tạo
+import { ref, query, orderByChild, equalTo, get } from "firebase/database";
 
 const ChatContainer = styled.div`
     position: absolute;
@@ -12,9 +15,8 @@ const ChatContainer = styled.div`
     width: 1340px;
     height: 700px;
     overflow: hidden;
-    display: flex; /* Thêm display: flex để các phần tử bên trong tự căn chỉnh */
+    display: flex;
 `;
-
 
 type Message = {
     sender: string;
@@ -22,11 +24,14 @@ type Message = {
     createAt: string;
     to: string;
 };
-
 const Chat = () => {
     const [selectedUser, setSelectedUser] = useState<string | null>(null);
     const [messages, setMessages] = useState<Message[]>([]);
     const [showUserSelection, setShowUserSelection] = useState<boolean>(true);
+    const { sendMessage } = useWebSocket();
+    const [reloginPerformed, setReloginPerformed] = useState(false);
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+
 
     const handleSelectUser = (userName: string, userMessages: Message[]) => {
         if (userName && userName.trim() !== '' && userMessages.length > 0) {
