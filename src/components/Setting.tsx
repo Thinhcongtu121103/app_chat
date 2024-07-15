@@ -8,19 +8,14 @@ import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import {ListItemText, Switch} from "@mui/material";
-import InfoIcon from '@mui/icons-material/Info';
-import BlockIcon from '@mui/icons-material/Block';
-import DeleteIcon from '@mui/icons-material/Delete';
 import ClearIcon from '@mui/icons-material/Clear';
 import BorderColorOutlinedIcon from '@mui/icons-material/BorderColorOutlined';
 import WcIcon from '@mui/icons-material/Wc';
 import CakeIcon from '@mui/icons-material/Cake';
 import PhoneAndroidIcon from '@mui/icons-material/PhoneAndroid';
-import avatarImage from '../assets/avatar.png';
 import backgroundImage from '../assets/backgroundImage.png'
 import { getStorage, ref, getDownloadURL } from "firebase/storage";
-import {database} from "../firebase";
-import {equalTo, get, orderByChild, query} from "firebase/database";
+
 
 const Container = styled.div`
     width: 440px;

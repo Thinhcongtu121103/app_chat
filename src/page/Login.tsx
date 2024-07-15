@@ -69,7 +69,6 @@ const Login: React.FC<LoginProps> = ({ setIsLoggedIn }) => {
                     if (snapshot.exists()) {
                         snapshot.forEach((childSnapshot) => {
                             const userData = childSnapshot.val();
-                            console.log(userData);
                             localStorage.setItem('currentUserName', userData.name);
                             localStorage.setItem('img', userData.img);
                         });
