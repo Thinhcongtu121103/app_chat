@@ -12,7 +12,7 @@ interface LoginProps {
 }
 
 const Login: React.FC<LoginProps> = ({ setIsLoggedIn }) => {
-    const { sendMessage, lastMessage, isLoggedIn, reconnect, disconnect } = useWebSocket();
+    const { sendMessage, lastMessage, isLoggedIn } = useWebSocket();
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [reloginPerformed, setReloginPerformed] = useState(false);

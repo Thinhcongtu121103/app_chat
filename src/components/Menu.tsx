@@ -93,6 +93,10 @@ export default function VerticalTabs() {
     };
     const handleLogout = () => {
         logout();
+        localStorage.removeItem('img')
+        localStorage.removeItem('currentUserName')
+        localStorage.removeItem('username')
+        localStorage.removeItem('loginCode')
         setValue(0);
         navigate('/login');
         window.location.reload(); // Optional: Reload the page after logout

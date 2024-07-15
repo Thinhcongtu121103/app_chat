@@ -31,8 +31,6 @@ const MessagesComponent: React.FC<MessagesComponentProps> = ({ onSelectUser, onS
                 data: { user: localStorage.getItem('username'), code: localStorage.getItem('loginCode') }
             }
         });
-        setReloginPerformed(true); // Set flag to true after performing relogin
-
     };
     // hàm relogin chính
     useEffect(() => {
