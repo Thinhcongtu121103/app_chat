@@ -1,18 +1,40 @@
 import React, {useEffect, useState} from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useWebSocket } from '../context/WebSocketContext';
-import { ReactComponent as RegisterIcon } from '../assets/login.svg'; // Import SVG vào đây
+import {useNavigate} from 'react-router-dom';
+import {useWebSocket} from '../context/WebSocketContext';
+import {ReactComponent as RegisterIcon} from '../assets/login.svg';
+import { getDatabase, ref, set, push } from "firebase/database";
+import {database} from "../firebase";
+
 
 const Register: React.FC = () => {
-    const { sendMessage, lastMessage, register } = useWebSocket();
+    const {sendMessage, lastMessage, register} = useWebSocket();
     const navigate = useNavigate();
 
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [name, setName] = useState('');
     const [phone, setPhone] = useState('');
-    const [Gender, setGender] = useState('');
+
     const [error, setError] = useState<string | null>(null);
+
+
+
+    const writeUserData = (username: string, password: string, name: string, phone: string) => {
+        // Tạo số ngẫu nhiên từ 1 đến 9
+        const randomNum = Math.floor(Math.random() * 9) + 1;
+        const imgDefault = `avaterDefault/avt_${randomNum}.jpg`;
+
+        const userRef = ref(database, 'users');
+        const newUserRef = push(userRef); // Tạo khóa tự động tăng cho người dùng mới
+        set(newUserRef, {
+            img: imgDefault,
+            name: name,
+            password: password,
+            phone: phone,
+            username: username
+        });
+    };
+
 
     const handleUsernameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setUsername(event.target.value);
@@ -21,12 +43,20 @@ const Register: React.FC = () => {
     const handlePasswordChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setPassword(event.target.value);
     };
+    const handleNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setName(event.target.value);
+    };
+    const handlePhoneChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setPhone(event.target.value);
+    };
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-
         // Gửi yêu cầu API đăng ký
         register(username, password);
+        //ghi dữ liệu lên Fisebase
+        writeUserData(username, password, name, phone);
+
     };
     const handleLoginClick = () => {
         navigate('/login');
@@ -56,8 +86,8 @@ const Register: React.FC = () => {
             {/*Right Pane*/}
             <div className="w-full bg-gray-100 lg:w-1/2 flex items-center justify-center">
                 <div className="max-w-md w-full p-6">
-                    <h1 className="text-3xl font-semibold mb-6 text-black text-center">ĐĂNG KÝ</h1>
-                    <h1 className="text-sm font-semibold mb-6 text-gray-500 text-center">
+                    <h1 className="text-3xl font-semibold mb-2 text-black text-center">ĐĂNG KÝ</h1>
+                    <h1 className="text-sm font-semibold mb-2 text-gray-500 text-center">
                         Chào mừng bạn đến với cộng đồng của chúng tôi! Đăng ký ngay để khám phá những điều tuyệt vời và
                         trải nghiệm không giới hạn!
                     </h1>
@@ -74,7 +104,7 @@ const Register: React.FC = () => {
                                 required
                                 value={username}
                                 onChange={handleUsernameChange}
-                                className="mt-1 p-2 w-full border rounded-md focus:border-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-300 transition-colors duration-300"/>
+                                className="mt-1 p-1 w-full border rounded-md focus:border-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-300 transition-colors duration-300"/>
                         </div>
                         <div>
                             <label htmlFor="password"
@@ -87,7 +117,7 @@ const Register: React.FC = () => {
                                 required
                                 value={password}
                                 onChange={handlePasswordChange}
-                                className="mt-1 p-2 w-full border rounded-md focus:border-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-300 transition-colors duration-300"/>
+                                className="mt-1 p-1 w-full border rounded-md focus:border-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-300 transition-colors duration-300"/>
                         </div>
                         <div>
                             <label htmlFor="name"
@@ -96,53 +126,51 @@ const Register: React.FC = () => {
                                 id="name"
                                 name="name"
                                 type="text"
-                                // autoComplete="new-password"
                                 required
                                 value={name}
-                                // onChange={handlePasswordChange}
-                                className="mt-1 p-2 w-full border rounded-md focus:border-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-300 transition-colors duration-300"/>
+                                onChange={handleNameChange}
+                                className="mt-1 p-1 w-full border rounded-md focus:border-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-300 transition-colors duration-300"/>
                         </div>
+                        {/*<div>*/}
+                        {/*    <label htmlFor="gender"*/}
+                        {/*           className="block text-sm font-medium text-gray-700">Gender*/}
+                        {/*    </label>*/}
+                        {/*    <div className="block pt-1 space-x-4">*/}
+                        {/*        <label>*/}
+                        {/*            <input*/}
+                        {/*                type="radio"*/}
+                        {/*                name="radio"*/}
+                        {/*                value="1"*/}
+                        {/*                className="mr-2 text-black border-2 border-gray-300 focus:border-gray-300 focus:ring-black"*/}
+                        {/*            />*/}
+                        {/*            Nam*/}
+                        {/*        </label>*/}
+                        {/*        <label>*/}
+                        {/*            <input*/}
+                        {/*                type="radio"*/}
+                        {/*                name="radio"*/}
+                        {/*                value="2"*/}
+                        {/*                className="mr-2 text-black border-2 border-gray-300 focus:border-gray-300 focus:ring-black"*/}
+                        {/*            />*/}
+                        {/*            Nữ*/}
+                        {/*        </label>*/}
+                        {/*    </div>*/}
+                        {/*</div>*/}
                         <div>
-                            <label htmlFor="name"
-                                className="block text-sm font-medium text-gray-700">Gender
-                            </label>
-                        <div className="block pt-3 pb-2 space-x-4">
-                            <label>
-                                <input
-                                    type="radio"
-                                    name="radio"
-                                    value="1"
-                                    className="mr-2 text-black border-2 border-gray-300 focus:border-gray-300 focus:ring-black"
-                                />
-                                Nam
-                            </label>
-                            <label>
-                                <input
-                                    type="radio"
-                                    name="radio"
-                                    value="2"
-                                    className="mr-2 text-black border-2 border-gray-300 focus:border-gray-300 focus:ring-black"
-                                />
-                                Nữ
-                            </label>
-                        </div>
-                </div>
-                <div>
-                    <label htmlFor="phone"
-                           className="block text-sm font-medium text-gray-700">Phone</label>
+                            <label htmlFor="phone"
+                                   className="block text-sm font-medium text-gray-700">Phone</label>
                             <input
                                 id="phone"
                                 name="phone"
                                 type="text"
-                                // autoComplete="new-password"
                                 required
                                 value={phone}
-                                // onChange={handlePasswordChange}
-                                className="mt-1 p-2 w-full border rounded-md focus:border-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-300 transition-colors duration-300"/>
+                                onChange={handlePhoneChange}
+                                className="mt-1 p-1 w-full border rounded-md focus:border-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-300 transition-colors duration-300"/>
                         </div>
                         <div>
-                            <div className="mt-4 flex flex-col lg:flex-row items-center justify-between">
-                                <div className="w-full lg:w-1/2 mb-2 lg:mb-0">
+                            <div className="mt-1 flex flex-col lg:flex-row items-center justify-between">
+                                <div className="w-full lg:w-1/2 mb-1 lg:mb-0">
                                     <button type="button"
                                             className="w-full flex justify-center items-center gap-2 bg-white text-sm text-gray-600 p-2 rounded-md hover:bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-200 transition-colors duration-300">
                                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" className="w-4"
@@ -172,12 +200,12 @@ const Register: React.FC = () => {
                                 </div>
                             </div>
                             <button type="submit"
-                                    className="mt-4 w-full bg-black text-white p-2 rounded-md hover:bg-gray-800 focus:outline-none focus:bg-black focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 transition-colors duration-300">
-                                Đăng Nhập
+                                    className="mt-2 w-full bg-black text-white p-2 rounded-md hover:bg-gray-800 focus:outline-none focus:bg-black focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 transition-colors duration-300">
+                                Đăng Ký
                             </button>
                         </div>
                     </form>
-                    <div className="mt-4 text-sm text-gray-600 text-center">
+                    <div className="mt-2 text-sm text-gray-600 text-center">
                         <p>Bạn đã có tài khoản?
                             <a href="#"
                                className="text-black hover:underline"

@@ -139,13 +139,12 @@ export default function VerticalTabs() {
                 <Chat/>
             </TabPanel>
             <TabPanel value={value} index={1}>
-                <Setting/>
-            </TabPanel>
-            <TabPanel value={value} index={2}>
                 <Profile/>
             </TabPanel>
+            <TabPanel value={value} index={2}>
+            </TabPanel>
             <TabPanel value={value} index={3}>
-                <Setting/>
+                {/*<Setting/>*/}
             </TabPanel>
             <Box sx={{ position: 'absolute', bottom: 20, left: 10,  }}>
                 <Button
