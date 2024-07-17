@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCirclePlus, faDoorOpen } from '@fortawesome/free-solid-svg-icons'; // Import biểu tượng Join Room
 import { useWebSocket } from '../context/WebSocketContext';
+import {getDownloadURL, getStorage, ref} from "firebase/storage";
 
 type MessagesComponentProps = {
     onSelectUser: (userName: string, messages: any[]) => void;
@@ -20,8 +21,23 @@ const MessagesComponent: React.FC<MessagesComponentProps> = ({ onSelectUser, onS
     const [roomJoined, setRoomJoined] = useState(false);
     const { sendMessage, userList, createRoom, joinRoom, fetchPeopleChatMessages, fetchRoomChatMessages, onMessage } = useWebSocket();
     const [currentSelected, setCurrentSelected] = useState<string>(''); // State để lưu trữ người dùng hiện tại được chọn
+    const [avatarURL, setAvatarURL] = useState<string | null>(null); // State để lưu URL của Avatar
+    const storage = getStorage();
 
 
+
+    useEffect(() => {
+        const pathReference = ref(storage,'' + localStorage.getItem('img'));
+
+        // Lấy URL của hình ảnh từ pathReference
+        getDownloadURL(pathReference)
+            .then(url => {
+                setAvatarURL(url); // Lưu URL vào state
+            })
+            .catch(error => {
+                console.error('Error getting download URL:', error);
+            });
+    }, []);
     // JSON relogin
     const sendRelogin = () => {
         sendMessage({

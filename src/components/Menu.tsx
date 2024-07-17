@@ -139,10 +139,9 @@ export default function VerticalTabs() {
                 <Chat/>
             </TabPanel>
             <TabPanel value={value} index={1}>
-                <Setting/>
+                <Profile/>
             </TabPanel>
             <TabPanel value={value} index={2}>
-                <Profile/>
             </TabPanel>
             <TabPanel value={value} index={3}>
                 <Setting/>
