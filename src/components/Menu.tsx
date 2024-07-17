@@ -97,6 +97,10 @@ export default function VerticalTabs() {
         localStorage.removeItem('currentUserName')
         localStorage.removeItem('username')
         localStorage.removeItem('loginCode')
+        localStorage.removeItem('address')
+        localStorage.removeItem('phone')
+        localStorage.removeItem('describe')
+
         setValue(0);
         navigate('/login');
         window.location.reload(); // Optional: Reload the page after logout
