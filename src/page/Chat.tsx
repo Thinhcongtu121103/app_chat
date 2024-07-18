@@ -17,6 +17,7 @@ const ChatContainer = styled.div`
     height: 700px;
     overflow: hidden;
     display: flex;
+    font-family: 'Roboto', sans-serif; /* Sử dụng font Roboto */
 `;
 
 type Message = {
@@ -65,8 +66,8 @@ const Chat = () => {
     const handleSelectRoom = (roomName: string, roomMessages: Message[]) => {
         if (roomName && roomName.trim() !== '') {
             setSelectedRoom(roomName);
-            console.log('Room messages:', roomMessages.length);
-            console.log('Room messages:', roomMessages);
+            // console.log('Room messages:', roomMessages.length);
+            // console.log('Room messages:', roomMessages);
             setRoomData(roomMessages.length > 0 ? roomMessages : []);
         } else {
             setSelectedRoom(null);
@@ -76,9 +77,9 @@ const Chat = () => {
     };
 
     const handleSendMessage = (message: string) => {
-        console.log('Send message:', message);
-        console.log('Selected user:', selectedUser);
-        console.log('Selected room:', selectedRoom);
+        // console.log('Send message:', message);
+        // console.log('Selected user:', selectedUser);
+        // console.log('Selected room:', selectedRoom);
         if ((selectedUser || selectedRoom) && message.trim()) {
             const newMessage: Message = {
                 sender: 'me',

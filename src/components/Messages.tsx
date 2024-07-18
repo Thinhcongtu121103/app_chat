@@ -1,8 +1,10 @@
+
 import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCirclePlus, faDoorOpen } from '@fortawesome/free-solid-svg-icons'; // Import biểu tượng Join Room
+import { faCirclePlus, faDoorOpen, faEnvelope } from '@fortawesome/free-solid-svg-icons'; // Import biểu tượng Join Room
 import { useWebSocket } from '../context/WebSocketContext';
 import {getDownloadURL, getStorage, ref} from "firebase/storage";
+
 
 type MessagesComponentProps = {
     onSelectUser: (userName: string, messages: any[]) => void;
@@ -10,7 +12,7 @@ type MessagesComponentProps = {
     showUserSelection: boolean;
 };
 
-const MessagesComponent: React.FC<MessagesComponentProps> = ({ onSelectUser, onSelectRoom }) => {
+const MessagesComponent: React.FC<MessagesComponentProps> = ({onSelectUser, onSelectRoom}) => {
     const [isCreatePopupOpen, setIsCreatePopupOpen] = useState(false);
     const [isJoinPopupOpen, setIsJoinPopupOpen] = useState(false);
     const [roomName, setRoomName] = useState('');
@@ -19,8 +21,17 @@ const MessagesComponent: React.FC<MessagesComponentProps> = ({ onSelectUser, onS
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [roomCreated, setRoomCreated] = useState(false);
     const [roomJoined, setRoomJoined] = useState(false);
-    const { sendMessage, userList, createRoom, joinRoom, fetchPeopleChatMessages, fetchRoomChatMessages, onMessage } = useWebSocket();
+    const {
+        sendMessage,
+        userList,
+        createRoom,
+        joinRoom,
+        fetchPeopleChatMessages,
+        fetchRoomChatMessages,
+        onMessage
+    } = useWebSocket();
     const [currentSelected, setCurrentSelected] = useState<string>(''); // State để lưu trữ người dùng hiện tại được chọn
+
     const [avatarURL, setAvatarURL] = useState<string | null>(null); // State để lưu URL của Avatar
     const storage = getStorage();
 
@@ -38,15 +49,23 @@ const MessagesComponent: React.FC<MessagesComponentProps> = ({ onSelectUser, onS
                 console.error('Error getting download URL:', error);
             });
     }, []);
+
+    const [isMessagePopupOpen, setIsMessagePopupOpen] = useState(false); // State cho popup tin nhắn mới
+    const [recipient, setRecipient] = useState('');
+    const [messageContent, setMessageContent] = useState('');
+    const [messageType, setMessageType] = useState('people'); // State cho loại tin nhắn
+    const [shouldFetchUserList, setShouldFetchUserList] = useState(false); // Thêm biến trạng thái
+
     // JSON relogin
     const sendRelogin = () => {
         sendMessage({
             action: 'onchat',
             data: {
                 event: 'RE_LOGIN',
-                data: { user: localStorage.getItem('username'), code: localStorage.getItem('loginCode') }
+                data: {user: localStorage.getItem('username'), code: localStorage.getItem('loginCode')}
             }
         });
+
     };
     // hàm relogin chính
     useEffect(() => {
@@ -97,6 +116,19 @@ const MessagesComponent: React.FC<MessagesComponentProps> = ({ onSelectUser, onS
     }, [roomJoined, sendMessage]);
 
     useEffect(() => {
+        if (shouldFetchUserList) {
+            console.log('Fetching user list after sending a message...');
+            sendMessage({
+                action: 'onchat',
+                data: {
+                    event: 'GET_USER_LIST'
+                }
+            });
+            setShouldFetchUserList(false);
+        }
+    }, [shouldFetchUserList, sendMessage]);
+
+    useEffect(() => {
         const handleNewMessage = (data: any) => {
             if (data.event === 'GET_PEOPLE_CHAT_MES') {
                 if (data.data && data.data.length > 0) {
@@ -135,6 +167,34 @@ const MessagesComponent: React.FC<MessagesComponentProps> = ({ onSelectUser, onS
     const toggleJoinPopup = () => {
         setIsJoinPopupOpen(!isJoinPopupOpen);
     };
+
+    const toggleMessagePopup = () => {
+        setIsMessagePopupOpen(!isMessagePopupOpen); // Thêm hàm để mở popup tin nhắn mới
+    };
+
+    const handleSendMessage = () => {
+        if (!recipient || !messageContent) {
+            console.error('Recipient or message content is empty');
+            return;
+        }
+
+        sendMessage({
+            action: 'onchat',
+            data: {
+                event: 'SEND_CHAT',
+                data: {
+                    type: messageType,
+                    to: recipient,
+                    mes: messageContent
+                }
+            }
+        });
+        setIsMessagePopupOpen(false);
+        setRecipient('');
+        setMessageContent('');
+        setShouldFetchUserList(true); // Đặt biến trạng thái để gọi API GET_USER_LIST
+    };
+
 
     const handleCreateRoom = () => {
         createRoom(roomName);
@@ -185,18 +245,21 @@ const MessagesComponent: React.FC<MessagesComponentProps> = ({ onSelectUser, onS
     }, []);
 
     return (
-        <div className="w-[349px] h-[700px] overflow-y-auto bg-white shadow flex-col justify-start items-center inline-flex">
+        <div
+            className="w-[349px] h-[700px] overflow-y-auto bg-white shadow flex-col justify-start items-center inline-flex">
             <div className="flex-col justify-start items-start flex w-full">
-                <div className="w-full justify-between items-center inline-flex sticky top-0 bg-white z-10 px-7">
+                <div className="w-full justify-between items-center inline-flex sticky top-0 bg-white z-10 ">
                     <div className="justify-start items-center gap-2.5 flex">
                         <div className="justify-start items-center gap-1.5 flex">
                             <div className="text-black text-xl font-semibold font-['Inter'] leading-[30px]">
                                 Messages
                             </div>
-                            <div className="w-4 h-4 relative" />
+                            <div className="w-4 h-4 relative"/>
                         </div>
-                        <div className="px-2 py-0.5 bg-slate-100 rounded-3xl flex-col justify-start items-start gap-2.5 inline-flex">
-                            <div className="text-black text-xs font-semibold font-['Inter'] leading-[18px]">{userList.length}</div>
+                        <div
+                            className="px-2 py-0.5 bg-slate-100 rounded-3xl flex-col justify-start items-start gap-2.5 inline-flex">
+                            <div
+                                className="text-black text-xs font-semibold font-['Inter'] leading-[18px]">{userList.length}</div>
                         </div>
                     </div>
                     <div className="flex items-center space-x-4">
@@ -204,13 +267,19 @@ const MessagesComponent: React.FC<MessagesComponentProps> = ({ onSelectUser, onS
                             className="flex items-center justify-center w-16 h-16 relative text-blue-500 text-3xl cursor-pointer"
                             onClick={toggleCreatePopup}
                         >
-                            <FontAwesomeIcon icon={faCirclePlus} />
+                            <FontAwesomeIcon icon={faCirclePlus}/>
                         </div>
                         <div
                             className="flex items-center justify-center w-16 h-16 relative text-green-500 text-3xl cursor-pointer"
                             onClick={toggleJoinPopup}
                         >
-                            <FontAwesomeIcon icon={faDoorOpen} />
+                            <FontAwesomeIcon icon={faDoorOpen}/>
+                        </div>
+                        <div
+                            className="flex items-center justify-center w-16 h-16 relative text-purple-500 text-3xl cursor-pointer"
+                            onClick={toggleMessagePopup}
+                        >
+                            <FontAwesomeIcon icon={faEnvelope}/>
                         </div>
                     </div>
                 </div>
@@ -299,7 +368,46 @@ const MessagesComponent: React.FC<MessagesComponentProps> = ({ onSelectUser, onS
                     </div>
                 </div>
             )}
-
+            {isMessagePopupOpen && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white p-6 rounded-lg shadow-lg">
+                        <h2 className="text-2xl mb-4">New Message</h2>
+                        <select
+                            className="border p-2 w-full mb-4"
+                            value={messageType}
+                            onChange={(e) => setMessageType(e.target.value)}
+                        >
+                            <option value="people">People</option>
+                            <option value="room">Room</option>
+                        </select>
+                        <input
+                            className="border p-2 w-full mb-4"
+                            type="text"
+                            placeholder="Recipient"
+                            value={recipient}
+                            onChange={(e) => setRecipient(e.target.value)}
+                        />
+                        <textarea
+                            className="border p-2 w-full mb-4"
+                            placeholder="Message"
+                            value={messageContent}
+                            onChange={(e) => setMessageContent(e.target.value)}
+                        />
+                        <button
+                            className="bg-blue-500 text-white px-4 py-2 rounded"
+                            onClick={handleSendMessage}
+                        >
+                            Send
+                        </button>
+                        <button
+                            className="bg-gray-500 text-white px-4 py-2 rounded ml-2"
+                            onClick={toggleMessagePopup}
+                        >
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
