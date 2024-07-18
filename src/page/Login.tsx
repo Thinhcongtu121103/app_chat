@@ -66,11 +66,15 @@ const Login: React.FC<LoginProps> = ({ setIsLoggedIn }) => {
                 }
 
                 get(usernameQuery).then((snapshot) => {
-                    if (snapshot.exists()) {
+                    if (snapshot.exists()){
                         snapshot.forEach((childSnapshot) => {
                             const userData = childSnapshot.val();
                             localStorage.setItem('currentUserName', userData.name);
                             localStorage.setItem('img', userData.img);
+                            localStorage.setItem('address', userData.address);
+                            localStorage.setItem('phone', userData.phone);
+                            localStorage.setItem('describe', userData.describe);
+
                         });
                     } else {
                         console.log("No data available");

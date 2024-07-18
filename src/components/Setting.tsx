@@ -1,26 +1,23 @@
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import styled from "styled-components";
-import IconButton from "@mui/material/IconButton";
 import Avatar from "@mui/material/Avatar";
 import Divider from '@mui/material/Divider';
 import Chip from '@mui/material/Chip';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemIcon from '@mui/material/ListItemIcon';
-import {ListItemText, Switch} from "@mui/material";
-import ClearIcon from '@mui/icons-material/Clear';
-import BorderColorOutlinedIcon from '@mui/icons-material/BorderColorOutlined';
-import WcIcon from '@mui/icons-material/Wc';
-import CakeIcon from '@mui/icons-material/Cake';
+import {TextField, Button} from "@mui/material";
+import HomeIcon from '@mui/icons-material/Home';
+import PictureInPictureAltIcon from '@mui/icons-material/PictureInPictureAlt';
 import PhoneAndroidIcon from '@mui/icons-material/PhoneAndroid';
-import backgroundImage from '../assets/backgroundImage.png'
-import { getStorage, ref, getDownloadURL } from "firebase/storage";
-
+import backgroundImage from '../assets/backgroundImage.png';
+import {getStorage, ref, getDownloadURL} from "firebase/storage";
+import {getDatabase, ref as dbRef, set} from "firebase/database"; // Import Firebase Database functions
 
 const Container = styled.div`
     width: 440px;
     padding: 20px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     background-color: white;
     border-radius: 8px;
 `;
@@ -29,25 +26,6 @@ const UserInfo = styled.div`
     display: flex;
     align-items: center;
     margin-bottom: 20px;
-    margin-left: -10px;
-`;
-
-const TitleInfo = styled.div`
-    display: flex;
-    text-align: center;
-    justify-content: space-between;
-`;
-
-const UserName = styled.div`
-    margin-left: 10px;
-    font-size: 20px;
-    font-weight: bold;
-`;
-
-const Title = styled.div`
-    font-size: 16px;
-    font-weight: bold;
-    margin-bottom: 10px;
     margin-left: -10px;
 `;
 
@@ -63,95 +41,114 @@ const ButtonUpdate = styled.div`
 `;
 
 const ChatSettingsPanel: React.FC = () => {
-    const [notifications, setNotifications] = React.useState(true);
-    const [blocked, setBlocked] = React.useState(false);
     const [currentUserName, setCurrentUserName] = useState('');
-    const [avatarURL, setAvatarURL] = useState<string | null>(null); // State để lưu URL của Avatar
-    const storage = getStorage();
-    const pathReference = ref(storage,'' + localStorage.getItem('img'));
+    const [address, setAddress] = useState('');
+    const [describe, setDescribe] = useState('');
+    const [phoneNumber, setPhoneNumber] = useState('');
+    const [avatarURL, setAvatarURL] = useState<string | null>(null);
 
+    const storage = getStorage();
+    const pathReference = ref(storage, '' + localStorage.getItem('img'));
 
     useEffect(() => {
         const username = localStorage.getItem('currentUserName');
-        if (username) {
+        const addressUser = localStorage.getItem('address');
+        const describeUser = localStorage.getItem('describe');
+        const phoneNumberUser = localStorage.getItem('phone');
+
+        if (username && addressUser && describeUser && phoneNumberUser) {
             setCurrentUserName(username);
+            setAddress(addressUser);
+            setDescribe(describeUser);
+            setPhoneNumber(phoneNumberUser);
         }
-        // Lấy URL của hình ảnh từ pathReference
         getDownloadURL(pathReference)
             .then(url => {
-                setAvatarURL(url); // Lưu URL vào state
+                setAvatarURL(url);
             })
             .catch(error => {
                 console.error('Error getting download URL:', error);
             });
     }, []);
 
-    const handleToggleNotifications = () => {
-        setNotifications(!notifications);
-    };
+    const handleSave = () => {
+        const db = getDatabase();
+        const userRef = dbRef(db, 'users/' + currentUserName); // Path to user data
 
-    const handleToggleBlocked = () => {
-        setBlocked(!blocked);
+        set(userRef, {
+            username: currentUserName,
+            address: address,
+            describe: describe,
+            phoneNumber: phoneNumber
+        }).then(() => {
+            alert('User data updated successfully');
+        }).catch((error) => {
+            console.error('Error updating user data:', error);
+        });
     };
 
     return (
         <Container>
-            <TitleInfo>
-                <Title>Thông tin tài khoản</Title>
-                <ClearIcon/>
-            </TitleInfo>
-
             <BackgroundImage>
                 <Avatar
                     src={backgroundImage}
-                    sx={{width: 440, height:170}}
+                    sx={{width: 440, height: 170}}
                     variant="square"
                 />
             </BackgroundImage>
-
             <UserInfo>
                 {avatarURL && (
                     <Avatar
                         src={avatarURL}
-                        sx={{ width: 100, height: 100 }}
+                        sx={{width: 100, height: 100}}
                     />
                 )}
-                <UserName>{currentUserName}</UserName>
-                <BorderColorOutlinedIcon sx={{marginLeft:2}}/>
+                <TextField
+                    label="Tên người dùng"
+                    variant="outlined"
+                    value={currentUserName}
+                    onChange={(e) => setCurrentUserName(e.target.value)}
+                    sx={{marginLeft: 2, marginTop: 4}}
+                />
             </UserInfo>
 
-            <Divider textAlign={"center"}><Chip label="Thông tin cá nhân" /></Divider>
+            <Divider textAlign={"center"}><Chip label="Thông tin cá nhân"/></Divider>
 
             <List>
                 <ListItem>
                     <ListItemIcon>
-                        <WcIcon/>
+                        <HomeIcon/>
                     </ListItemIcon>
-                    <ListItemText primary="Nam" />
-                </ListItem>
-                <ListItem>
-                    <ListItemIcon>
-                        <CakeIcon/>
-                    </ListItemIcon>
-                    <ListItemText primary="24 tháng 12 năm 2003" />
+                    <TextField
+                        label="Địa chỉ"
+                        variant="outlined"
+                        value={address}
+                        onChange={(e) => setAddress(e.target.value)}
+                    />
                 </ListItem>
                 <ListItem>
                     <ListItemIcon>
                         <PhoneAndroidIcon/>
                     </ListItemIcon>
-                    <ListItemText primary="+84 394 707 535" />
+                    <TextField
+                        label="Số điện thoại"
+                        variant="outlined"
+                        value={phoneNumber}
+                        onChange={(e) => setPhoneNumber(e.target.value)}
+                    />
                 </ListItem>
                 <ListItem>
-                    <ListItemText primary="Chỉ bạn bè có lưu số của bạn trong danh bạ máy mới xem được số này" />
+                    <ListItemIcon>
+                        <PictureInPictureAltIcon/>
+                    </ListItemIcon>
+                    <TextField
+                        label="Mô tả"
+                        variant="outlined"
+                        value={describe}
+                        onChange={(e) => setDescribe(e.target.value)}
+                    />
                 </ListItem>
             </List>
-
-            <Divider/>
-
-            <ButtonUpdate>
-                <BorderColorOutlinedIcon/>
-                <Title style={{marginLeft:4}}>Cập nhật</Title>
-            </ButtonUpdate>
         </Container>
     );
 };
