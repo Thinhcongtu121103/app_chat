@@ -5,6 +5,7 @@ import Chat from './page/Chat';
 import Login from './page/Login';
 import Register from './page/Register'; // Import Register component
 import Menu from './components/Menu';
+import { CssBaseline } from '@mui/material';
 
 const App: React.FC = () => {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -21,18 +22,21 @@ const App: React.FC = () => {
     }, []);
 
     return (
-        <Router>
-            <WebSocketProvider>
-                <Routes>
-                    <Route path="/login" element={<Login setIsLoggedIn={setIsLoggedIn} />} />
-                    <Route path="/register" element={<Register />} /> {/* Thêm Route cho trang /register */}
-                    <Route path="/" element={<PrivateRoute isLoggedIn={isLoggedIn} />}>
-                        <Route path="/" element={<Menu />} />
-                    </Route>
-                </Routes>
-                <ReLogin setIsLoggedIn={setIsLoggedIn} />
-            </WebSocketProvider>
-        </Router>
+        <>
+            <CssBaseline />
+            <Router>
+                <WebSocketProvider>
+                    <Routes>
+                        <Route path="/login" element={<Login setIsLoggedIn={setIsLoggedIn} />} />
+                        <Route path="/register" element={<Register />} /> {/* Thêm Route cho trang /register */}
+                        <Route path="/" element={<PrivateRoute isLoggedIn={isLoggedIn} />}>
+                            <Route path="/" element={<Menu />} />
+                        </Route>
+                    </Routes>
+                    <ReLogin setIsLoggedIn={setIsLoggedIn} />
+                </WebSocketProvider>
+            </Router>
+        </>
     );
 };
 

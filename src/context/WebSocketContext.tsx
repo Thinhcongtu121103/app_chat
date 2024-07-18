@@ -42,7 +42,7 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
 
     useEffect(() => {
         const messageListener = (message: any) => {
-            console.log('Received message:', message);
+            // console.log('Received message:', message);
             setLastMessage(message);
 
             switch (message.event) {
@@ -77,7 +77,7 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
 
     useEffect(() => {
         if (isLoggedIn) {
-            console.log('Fetching user list...');
+            // console.log('Fetching user list...');
             fetchUserList();
         }
     }, [isLoggedIn]);

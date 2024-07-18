@@ -295,7 +295,7 @@ const MessageMain: React.FC<MessageMainProps> = ({
                             </div>
                             <div className="flex-col justify-start items-start inline-flex">
                                 <div className="text-black text-xl font-semibold font-['Inter'] leading-[25px]">
-                                    {friendName || selectedRoom || 'No User available'}
+                                    {selectedUser || selectedRoom || 'No User available'}
                                 </div>
                                 {selectedUser && (
                                     <div className="justify-start items-center gap-2 inline-flex">
