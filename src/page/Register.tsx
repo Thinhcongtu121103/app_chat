@@ -23,10 +23,13 @@ const Register: React.FC = () => {
         // Tạo số ngẫu nhiên từ 1 đến 9
         const randomNum = Math.floor(Math.random() * 9) + 1;
         const imgDefault = `avaterDefault/avt_${randomNum}.jpg`;
-
+        const address = "Bạn vui lòng hãy cập nhật địa chỉ của mình!";
+        const describe = "Hãy tham gia cộng đồng và tận hưởng các tính năng hiện đại để kết nối mọi lúc mọi nơi.";
         const userRef = ref(database, 'users');
         const newUserRef = push(userRef); // Tạo khóa tự động tăng cho người dùng mới
         set(newUserRef, {
+            address: address,
+            describe: describe,
             img: imgDefault,
             name: name,
             password: password,
